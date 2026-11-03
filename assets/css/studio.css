@@ -1,0 +1,1708 @@
+/* =========================================================
+   工作室 / 管理页
+   ========================================================= */
+
+.studio-page {
+  background: #0a0b0d;
+}
+
+.studio-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding-top: env(safe-area-inset-top);
+  border-bottom: 1px solid var(--line);
+  /* 与首页同理：常驻 sticky 的全宽毛玻璃会让滚动每帧多一次模糊 pass，
+     底色提高不透明度、模糊半径减半后观感几乎不变。 */
+  background: rgba(236, 231, 222, 0.94);
+  -webkit-backdrop-filter: saturate(1.08) blur(7px);
+  backdrop-filter: saturate(1.08) blur(7px);
+}
+
+.studio-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  max-width: 1380px;
+  min-height: 72px;
+  margin-inline: auto;
+  padding-inline: var(--page-pad);
+}
+
+.studio-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  max-width: 52vw;
+  line-height: 1;
+}
+
+.studio-brand__name {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: 25px;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-brand__mark {
+  flex: 0 0 auto;
+  padding: 5px 7px;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+}
+
+.studio-header__actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 18px;
+}
+
+.save-indicator {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  transition: color 0.25s var(--ease);
+}
+
+.save-indicator.is-success {
+  color: #50644c;
+}
+
+.save-indicator.is-error {
+  color: #8b3d2c;
+}
+
+.studio-main {
+  width: 100%;
+  max-width: 1380px;
+  margin-inline: auto;
+  padding: clamp(44px, 6vw, 82px) var(--page-pad) 40px;
+}
+
+.studio-intro {
+  margin-bottom: clamp(38px, 5vw, 64px);
+}
+
+.studio-intro .eyebrow {
+  margin-bottom: clamp(22px, 3vw, 34px);
+}
+
+.studio-intro__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  align-items: end;
+  gap: clamp(34px, 7vw, 100px);
+}
+
+.studio-intro h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(50px, 7.2vw, 100px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.studio-intro__copy {
+  max-width: 390px;
+  padding-bottom: 8px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.studio-intro__note {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.studio-grid {
+  display: grid;
+  grid-template-columns: minmax(310px, 390px) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(22px, 3vw, 38px);
+}
+
+.studio-jump {
+  display: none;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 18px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.studio-jump a {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.studio-jump a:hover {
+  color: var(--ink);
+}
+
+.storage-warning {
+  margin-bottom: 22px;
+  padding: 14px 16px;
+  border-left: 2px solid #a05b48;
+  background: #f2e9e3;
+  color: #63392d;
+}
+
+.storage-warning strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.storage-warning p {
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.panel {
+  padding: clamp(22px, 2.8vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-soft);
+  scroll-margin-top: 92px;
+}
+
+.panel__head {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel__head--row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.panel__index {
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.panel__head h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(27px, 2.8vw, 36px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.panel__desc {
+  max-width: 430px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.works-total {
+  flex: 0 0 auto;
+  padding-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 表单 ---------- */
+
+.profile-form {
+  padding-top: 24px;
+}
+
+.avatar-field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.avatar-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 68px;
+  height: 85px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+}
+
+.avatar-preview span {
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.avatar-preview img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.avatar-actions .field-hint {
+  flex-basis: 100%;
+  margin-top: 2px;
+}
+
+.text-button {
+  position: relative;
+  padding-bottom: 2px;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  text-align: left;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.text-button:hover {
+  border-color: var(--ink);
+}
+
+.text-button--muted {
+  color: var(--muted);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.field > span:first-child {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.field > span em {
+  margin-left: 4px;
+  color: var(--accent);
+  font-style: normal;
+  font-size: 7px;
+  letter-spacing: 0.08em;
+}
+
+.field input,
+.field textarea,
+.field select {
+  display: block;
+  width: 100%;
+  padding: 8px 0 9px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.25s var(--ease);
+}
+
+.field select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 9px) 55%, calc(100% - 4px) 55%;
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+  padding-right: 20px;
+}
+
+/* 下拉面板：始终白底黑字。
+   工作室是深色主题（.studio-page 上写了 color-scheme: dark），浏览器会拿
+   控件本身的浅色文字去渲染浅色面板，于是只有鼠标划过的那一项才看得清。
+   这里把面板的配色方案锁成浅色，并把每一项显式写成白底黑字，
+   这样在没有悬停、没有展开之前，选项就是可读的白底黑字。 */
+.field select {
+  color-scheme: light;
+}
+
+.field select option,
+.field select optgroup {
+  background-color: #ffffff;
+  color: #16181c;
+}
+
+.field select option:checked {
+  background-color: #eae3d6;
+  color: #16181c;
+}
+
+.studio-page .field select option,
+.studio-page .field select optgroup {
+  background-color: #ffffff;
+  color: #16181c;
+}
+
+.field textarea {
+  min-height: 54px;
+  resize: vertical;
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover {
+  border-color: var(--line-strong);
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--ink);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(124, 119, 109, 0.62);
+}
+
+.field input:invalid:not(:placeholder-shown) {
+  border-color: #a05b48;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 6px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.form-status {
+  color: #50644c;
+  font-size: 9px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.form-status.is-error {
+  color: #8b3d2c;
+}
+
+.profile-next {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+.profile-next a {
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-soft);
+}
+
+.profile-next a:hover {
+  border-color: var(--ink);
+}
+
+/* ---------- 上传 ---------- */
+
+.works-panel {
+  min-width: 0;
+}
+
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 176px;
+  margin-top: 24px;
+  padding: 24px 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(243, 240, 233, 0.4);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.25s var(--ease), background-color 0.25s var(--ease);
+}
+
+.upload-zone:hover,
+.upload-zone:focus-visible,
+.upload-zone.is-dragover {
+  border-color: var(--ink);
+  background: var(--paper-deep);
+}
+
+.upload-zone.is-busy {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.upload-zone__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--ink-soft);
+}
+
+.upload-zone__icon .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.upload-zone__title {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+.upload-zone__hint {
+  max-width: 480px;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+.upload-progress {
+  margin-top: 18px;
+}
+
+.upload-progress__track {
+  width: 100%;
+  height: 2px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.upload-progress__bar {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--ink);
+  transition: width 0.35s var(--ease);
+}
+
+.upload-progress__text {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.upload-errors {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-left: 2px solid #a05b48;
+  background: #f2e9e3;
+  color: #6f3d2f;
+  font-size: 10px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.upload-errors p + p {
+  margin-top: 4px;
+}
+
+.works-list {
+  margin-top: 8px;
+  /* 排序后整个列表会重建，浏览器默认的滚动锚定会顺手调一下滚动位置，
+     和我们自己还原的位置打架（实测会漂 20~30px）。这里由脚本负责还原，
+     关掉锚定，位置就完全可控了。 */
+  overflow-anchor: none;
+}
+
+.work-editor {
+  display: grid;
+  grid-template-columns: 172px minmax(0, 1fr);
+  gap: 22px;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+}
+
+.work-editor:first-child {
+  border-top: 0;
+}
+
+.work-editor__thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--paper-deep);
+}
+
+.work-editor__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.work-editor__thumb-fallback {
+  padding: 10px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.ratio-badge {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(248, 246, 241, 0.88);
+  color: var(--ink-soft);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.work-editor__body {
+  min-width: 0;
+}
+
+.work-editor__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.work-editor__index {
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.work-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+.icon-button:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.icon-button:disabled {
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.icon-button--danger:hover {
+  border-color: #8b3d2c;
+  background: #8b3d2c;
+}
+
+.icon-button .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.work-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) 78px minmax(0, 1fr);
+  gap: 0 14px;
+}
+
+.work-fields .field {
+  margin-bottom: 10px;
+}
+
+.work-fields .field input,
+.work-fields .field textarea,
+.work-fields .field select {
+  padding-top: 5px;
+  padding-bottom: 6px;
+  font-size: 13px;
+}
+
+.work-fields .field textarea {
+  min-height: 44px;
+}
+
+.work-fields__category,
+.work-fields__caption {
+  grid-column: 1 / -1;
+}
+
+/* ---------- 构图范围：与「作品范围」并列的独立模块 ---------- */
+.field--composition {
+  grid-column: 1 / -1;
+  margin-bottom: 12px;
+  padding: 11px 13px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.024);
+}
+
+.composition__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 9px;
+}
+
+.composition__title {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.composition__auto {
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+
+.composition__auto b {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.composition-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.composition-option {
+  min-height: 26px;
+  padding: 5px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  transition: color 0.22s var(--ease), border-color 0.22s var(--ease),
+    background-color 0.22s var(--ease);
+}
+
+.composition-option:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.composition-option.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #19140c;
+}
+
+.composition-option:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* .field input 统一给了 display:block，会盖掉浏览器对 hidden 的默认隐藏。 */
+.field--composition input[type='hidden'] {
+  display: none !important;
+}
+
+.autosave {
+  min-height: 13px;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+.autosave.is-error {
+  color: #8b3d2c;
+}
+
+.empty-state {
+  margin-top: 20px;
+  padding: 26px 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.empty-state__title {
+  margin-bottom: 4px;
+  color: var(--ink-soft);
+  font-family: var(--font-serif);
+  font-size: 18px;
+}
+
+.storage-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+.storage-note .icon {
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+.studio-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: clamp(44px, 6vw, 72px);
+  padding: 22px 0 max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.7;
+  text-transform: uppercase;
+}
+
+.studio-footer a {
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-soft);
+}
+
+.studio-footer a:hover {
+  border-color: var(--ink);
+}
+
+@media (max-width: 1040px) {
+  .studio-grid {
+    grid-template-columns: minmax(280px, 350px) minmax(0, 1fr);
+  }
+
+  .work-editor {
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .work-fields {
+    grid-template-columns: minmax(0, 1fr) 68px;
+  }
+
+  .work-fields .field:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 880px) {
+  .studio-intro__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .studio-intro__copy {
+    max-width: 540px;
+    padding-bottom: 0;
+  }
+
+  .studio-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .studio-jump {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .studio-header__inner {
+    min-height: 62px;
+    gap: 12px;
+  }
+
+  .studio-brand {
+    gap: 8px;
+  }
+
+  .studio-brand__name {
+    font-size: 19px;
+  }
+
+  .studio-brand__mark {
+    font-size: 6px;
+    padding: 4px 5px;
+  }
+
+  .studio-header__actions {
+    gap: 10px;
+  }
+
+  .save-indicator {
+    display: none;
+  }
+
+  .studio-header .button {
+    min-height: 38px;
+    padding: 8px 11px;
+    font-size: 10px;
+  }
+
+  .studio-main {
+    padding-top: 38px;
+    padding-bottom: 24px;
+  }
+
+  .studio-intro h1 {
+    font-size: clamp(46px, 14vw, 68px);
+  }
+
+  .studio-intro__copy {
+    font-size: 11px;
+  }
+
+  .panel {
+    padding: 20px 18px;
+  }
+
+  .panel__head {
+    padding-bottom: 18px;
+  }
+
+  .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field input,
+  .field textarea,
+  .field select {
+    font-size: 16px;
+  }
+
+  .work-fields .field input,
+  .work-fields .field textarea,
+  .work-fields .field select {
+    font-size: 16px;
+  }
+
+  .avatar-preview {
+    width: 60px;
+    height: 75px;
+  }
+
+  .upload-zone {
+    min-height: 156px;
+    margin-top: 18px;
+    padding: 20px 14px;
+  }
+
+  .upload-zone__title {
+    font-size: 17px;
+  }
+
+  .upload-zone__hint {
+    font-size: 8px;
+    line-height: 1.8;
+  }
+
+  .work-editor {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+    padding: 20px 0;
+  }
+
+  .work-editor__actions .icon-button {
+    width: 30px;
+    height: 30px;
+  }
+
+  .work-fields {
+    grid-template-columns: minmax(0, 1fr) 64px;
+    gap: 0 10px;
+  }
+
+  .work-fields .field:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .work-editor__top {
+    margin-bottom: 2px;
+  }
+
+  .work-editor__index {
+    font-size: 16px;
+  }
+
+  .work-fields .field > span:first-child {
+    font-size: 7px;
+  }
+
+  .ratio-badge {
+    right: 4px;
+    bottom: 4px;
+    font-size: 7px;
+    padding: 3px 5px;
+  }
+
+  .studio-footer {
+    align-items: flex-start;
+    gap: 6px 18px;
+  }
+
+  .studio-footer p:nth-child(2) {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .work-editor {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .work-editor__thumb {
+    aspect-ratio: 16 / 9;
+    max-height: 180px;
+  }
+
+  .work-editor__actions .icon-button {
+    width: 38px;
+    height: 38px;
+  }
+
+  .work-editor__top {
+    margin-top: 2px;
+    margin-bottom: 0;
+  }
+}
+
+/* iOS Safari 会在聚焦小于 16px 的输入框时自动放大页面。 */
+@media (pointer: coarse) {
+  .field input,
+  .field textarea,
+  .field select,
+  .work-fields .field input,
+  .work-fields .field textarea,
+  .work-fields .field select {
+    font-size: 16px;
+  }
+}
+
+/* 触屏设备：小号文字链接（品牌名、文字按钮、页脚链接）实际高度只有 14-19px。
+   用透明的 ::after 把命中区撑大，视觉与排版完全不变。 */
+@media (pointer: coarse) {
+  .studio-brand,
+  .text-button,
+  .studio-footer a {
+    position: relative;
+  }
+
+  .studio-brand::after,
+  .text-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+
+  .studio-footer a::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 36px;
+    transform: translateY(-50%);
+  }
+}
+
+/* =========================================================
+   动态交互层（二次优化）
+   ========================================================= */
+
+/* ---------- 作品卡片的入场 / 收起 ---------- */
+.work-editor.is-entering {
+  animation: editor-enter 0.6s var(--ease) backwards;
+  animation-delay: calc(var(--enter-i, 0) * 45ms);
+}
+
+@keyframes editor-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.work-editor.is-leaving {
+  animation: editor-leave 0.24s var(--ease) forwards;
+  pointer-events: none;
+}
+
+@keyframes editor-leave {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+}
+
+/* ---------- 保存反馈 ---------- */
+.save-indicator.is-pulse {
+  animation: indicator-pulse 0.9s var(--ease);
+}
+
+@keyframes indicator-pulse {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 上传区 ---------- */
+.upload-zone.is-dragover {
+  border-color: var(--accent);
+  background: rgba(200, 168, 107, 0.09);
+  animation: zone-pulse 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes zone-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 rgba(200, 168, 107, 0);
+  }
+
+  50% {
+    box-shadow: inset 0 0 0 4px rgba(200, 168, 107, 0.14);
+  }
+}
+
+.upload-progress__bar {
+  background: linear-gradient(90deg, var(--accent), #7d6435, var(--accent));
+  background-size: 220% 100%;
+  animation: progress-sheen 1.6s linear infinite;
+}
+
+/* 上传结束后进度条不再"还在处理"，也停掉这条永远重绘的流光动画。 */
+.upload-progress__bar.is-done {
+  animation: none;
+}
+
+@keyframes progress-sheen {
+  to {
+    background-position: -220% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upload-zone.is-dragover,
+  .upload-progress__bar {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   暗色主题：与作品集首页一致的近黑底 + 香槟金
+   —— 组件本身都在用变量，这里重定义变量即可整体转换；
+      只有少数写死的浅色（占位符、提示条、语义色）需要单独覆盖。
+   ========================================================= */
+
+.studio-page {
+  --paper: #0a0b0d;
+  --paper-soft: #0e1013;
+  --paper-deep: #15171b;
+  --ink: #f0ede7;
+  --ink-soft: #c7c3ba;
+  --muted: #8a8880;
+  --line: rgba(240, 237, 231, 0.12);
+  --line-soft: rgba(240, 237, 231, 0.06);
+  --line-strong: rgba(240, 237, 231, 0.26);
+  --accent: #c8a86b;
+  --accent-light: #e7d2a4;
+  --shadow-soft: 0 26px 70px rgba(0, 0, 0, 0.5);
+  min-height: 100vh;
+  background:
+    radial-gradient(1000px 560px at 50% -12%, rgba(200, 168, 107, 0.06), transparent 70%),
+    linear-gradient(180deg, #0c0e11 0%, #0a0b0d 46%, #07080a 100%);
+  color-scheme: dark;
+  color: var(--ink);
+}
+
+.studio-page .studio-header {
+  background: rgba(10, 11, 13, 0.92);
+}
+
+.studio-page .upload-zone {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.studio-page .work-editor {
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.studio-page .field input::placeholder,
+.studio-page .field textarea::placeholder {
+  color: rgba(199, 195, 186, 0.4);
+}
+
+/* 语义色在深色底上要提高明度，否则读不出来。 */
+.studio-page .save-indicator.is-success,
+.studio-page .form-status {
+  color: #93b585;
+}
+
+.studio-page .save-indicator.is-error,
+.studio-page .form-status.is-error,
+.studio-page .autosave.is-error {
+  color: #e08a72;
+}
+
+.studio-page .storage-warning,
+.studio-page .upload-errors {
+  border-left-color: #c07a5f;
+  background: rgba(192, 122, 95, 0.12);
+  color: #f0d3c6;
+}
+
+.studio-page .field input:invalid:not(:placeholder-shown) {
+  border-color: #d08a70;
+}
+
+.studio-page .icon-button--danger:hover {
+  border-color: #b8503a;
+  background: #b8503a;
+}
+
+/* =========================================================
+   实时同步：顶栏状态、一次性提示条、说明文字里的代码片段
+   ========================================================= */
+
+.sync-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sync-mode::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.sync-mode[data-state="on"] {
+  color: #93b585;
+}
+
+.sync-mode[data-state="on"]::before {
+  opacity: 1;
+  animation: sync-pulse 2.8s var(--ease-in-out) infinite;
+}
+
+.sync-mode[data-state="wait"] {
+  color: var(--accent);
+}
+
+.sync-mode[data-state="wait"]::before {
+  opacity: 1;
+  animation: sync-pulse 1.6s var(--ease-in-out) infinite;
+}
+
+.sync-mode[data-state="off"] {
+  color: #e08a72;
+}
+
+.sync-mode[data-state="off"]::before {
+  opacity: 1;
+}
+
+@keyframes sync-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sync-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(18px, 2.4vw, 30px);
+  padding: 14px 18px;
+  border: 1px solid rgba(200, 168, 107, 0.3);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: rgba(200, 168, 107, 0.075);
+  color: var(--ink-soft);
+  font-size: 11.5px;
+  line-height: 1.7;
+}
+
+.sync-banner__text {
+  min-width: 0;
+  flex: 1 1 320px;
+}
+
+.sync-banner .button {
+  flex: 0 0 auto;
+}
+
+.studio-intro__note code {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(240, 237, 231, 0.08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+@media (max-width: 720px) {
+  .studio-header__actions {
+    gap: 12px;
+  }
+
+  /* 小屏上只保留状态圆点，详情交给 title 提示。 */
+  .sync-mode {
+    gap: 0;
+    font-size: 0;
+  }
+
+  .sync-mode::before {
+    width: 7px;
+    height: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sync-mode[data-state="on"]::before,
+  .sync-mode[data-state="wait"]::before {
+    animation: none;
+  }
+}
+
+/* ---------- 线上公开版本：整页只读 ---------- */
+
+.sync-mode[data-state="static"] {
+  color: var(--accent-light);
+}
+
+.sync-mode[data-state="static"]::before {
+  background: var(--accent);
+  opacity: 0.9;
+  animation: none;
+}
+
+body.is-online .studio-jump,
+body.is-online .studio-grid {
+  display: none;
+}
+
+.studio-locked {
+  margin: 28px 0 0;
+  padding: 30px 32px 34px;
+  border: 1px solid rgba(200, 168, 107, 0.28);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(200, 168, 107, 0.07), rgba(200, 168, 107, 0.02)),
+    rgba(16, 18, 21, 0.6);
+}
+
+.studio-locked__tag {
+  margin: 0 0 12px;
+  color: var(--accent-light);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.studio-locked h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.studio-locked__count {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.studio-locked__steps {
+  margin: 0 0 20px;
+  padding: 0 0 0 20px;
+  display: grid;
+  gap: 12px;
+  color: rgba(240, 237, 231, 0.82);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.studio-locked__steps strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.studio-locked__note {
+  margin: 0;
+  padding: 14px 16px;
+  border-left: 2px solid rgba(200, 168, 107, 0.5);
+  background: rgba(240, 237, 231, 0.04);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.studio-locked__actions {
+  margin: 24px 0 0;
+}
+
+@media (max-width: 720px) {
+  .studio-locked {
+    padding: 24px 20px 26px;
+  }
+}
+
+/* ============================================================
+   编辑权限：只有运行网站的这台电脑能改内容。
+   其它设备打开工作室时，用一整屏的说明代替所有编辑界面。
+   ============================================================ */
+
+.sync-mode[data-state="locked"] {
+  color: var(--accent-light);
+}
+
+.sync-mode[data-state="locked"]::before {
+  width: 5px;
+  height: 6px;
+  border-radius: 1px;
+  opacity: 1;
+}
+
+.lock-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(40px, 9vh, 110px) clamp(20px, 5vw, 48px) clamp(56px, 10vh, 120px);
+}
+
+.lock-screen[hidden] {
+  display: none;
+}
+
+.lock-screen__card {
+  width: min(560px, 100%);
+  padding: clamp(28px, 4vw, 46px) clamp(24px, 4vw, 44px) clamp(26px, 3.6vw, 40px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background:
+    radial-gradient(560px 300px at 50% -30%, rgba(200, 168, 107, 0.09), transparent 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012));
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.lock-screen__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin: 18px 0 20px;
+  border: 1px solid rgba(200, 168, 107, 0.42);
+  border-radius: 50%;
+  color: var(--accent-light);
+  background: rgba(200, 168, 107, 0.08);
+}
+
+.lock-screen__icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lock-screen__title {
+  margin: 0 0 14px;
+  font-size: clamp(24px, 3.4vw, 32px);
+  font-weight: 500;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.lock-screen__text {
+  margin: 0 auto 22px;
+  max-width: 42ch;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.9;
+}
+
+.lock-screen__hint {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.lock-screen__urls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 10px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.lock-screen__urls a {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--accent-light);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.lock-screen__urls a:hover,
+.lock-screen__urls a:focus-visible {
+  border-color: var(--accent);
+  background: rgba(200, 168, 107, 0.1);
+}
+
+.lock-screen__foot {
+  margin: 0 0 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+.lock-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 12px;
+}
+
+/* 只读设备：整块编辑区收起，只留锁屏说明与顶栏。 */
+.studio-page.is-locked .studio-main {
+  display: none;
+}
+
+.studio-page.is-locked .save-indicator {
+  display: none;
+}
+
+@media (max-width: 620px) {
+  .lock-screen {
+    padding-top: 34px;
+  }
+
+  .lock-screen__card {
+    border-radius: 16px;
+  }
+
+  .lock-screen__urls {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lock-screen__urls a {
+    transition: none;
+  }
+}
+
+/* ---------- 长按拖拽排序 ---------- */
+
+/* 缩略图不能是浏览器原生可拖拽的，不然长按拖卡片会变成拖图片 */
+.work-editor img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* 鼠标停在缩略图上变成「抓」，暗示这里可以按住拖动 */
+@media (hover: hover) and (pointer: fine) {
+  .work-editor__thumb {
+    cursor: grab;
+  }
+}
+
+body.is-dragging-work {
+  cursor: grabbing;
+}
+
+.works-list.is-dragging {
+  user-select: none;
+}
+
+/* 拖动期间给所有卡片加一层布局隔离：换位时卡片只是「换个位置」，
+   内部不必跟着重新排版，整列表重排会明显便宜。 */
+body.is-dragging-work .work-editor {
+  contain: layout;
+}
+
+/* 拖起来的那张：抬出纸面、半透明，能看见下面让位的卡片 */
+.work-editor.is-dragging {
+  position: relative;
+  z-index: 30;
+  border-color: var(--accent);
+  border-radius: 12px;
+  background: var(--paper-deep);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5);
+  opacity: 0.88;
+  cursor: grabbing;
+  /* 拖动时不要过渡：一旦这个属性去追指针，手感就是「卡」
+     （松手滑回位那一下靠内联 transition，优先级更高，不受影响） */
+  transition: none;
+  /* 位移走合成层，不触发重排重绘 */
+  will-change: transform;
+  pointer-events: none;
+}
+
+.work-editor.is-dragging .work-editor__thumb {
+  cursor: grabbing;
+}
+
+/* 半虚化：只虚化图片，卡片上的文字保持清晰 */
+.work-editor.is-dragging .work-editor__thumb img {
+  filter: blur(1.5px) saturate(1.04);
+}

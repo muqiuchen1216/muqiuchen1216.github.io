@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2350 1000" role="img" aria-label="潮间，海面上的晨光">
+  <defs>
+    <linearGradient id="tide-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dad6cb"/>
+      <stop offset="0.46" stop-color="#cdd0c8"/>
+      <stop offset="0.82" stop-color="#bcc3bb"/>
+      <stop offset="1" stop-color="#aab5ae"/>
+    </linearGradient>
+    <linearGradient id="tide-sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#95a19a"/>
+      <stop offset="0.2" stop-color="#7f8d86"/>
+      <stop offset="0.56" stop-color="#5b6963"/>
+      <stop offset="0.82" stop-color="#3d4a45"/>
+      <stop offset="1" stop-color="#2a3531"/>
+    </linearGradient>
+    <radialGradient id="tide-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff1d8" stop-opacity="0.95"/>
+      <stop offset="0.28" stop-color="#f8e4c2" stop-opacity="0.5"/>
+      <stop offset="0.65" stop-color="#f3ddba" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#f3ddba" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tide-reflect" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8e7c9" stop-opacity="0.7"/>
+      <stop offset="0.28" stop-color="#e9d2ad" stop-opacity="0.32"/>
+      <stop offset="0.72" stop-color="#d9bd94" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#d9bd94" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="tide-vignette" cx="0.5" cy="0.46" r="0.76">
+      <stop offset="0.55" stop-color="#101512" stop-opacity="0"/>
+      <stop offset="0.86" stop-color="#101512" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#101512" stop-opacity="0.32"/>
+    </radialGradient>
+    <filter id="tide-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="tide-soft-small" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <rect width="2350" height="1000" fill="url(#tide-sky)"/>
+
+  <g opacity="0.58" filter="url(#tide-soft)">
+    <ellipse cx="610" cy="233" rx="560" ry="78" fill="#d9dad1"/>
+    <ellipse cx="1590" cy="198" rx="690" ry="62" fill="#deddd4"/>
+    <ellipse cx="1940" cy="330" rx="510" ry="58" fill="#c5cac1"/>
+  </g>
+
+  <circle cx="1570" cy="337" r="235" fill="url(#tide-glow)"/>
+  <circle cx="1570" cy="337" r="43" fill="#f7e8ce" opacity="0.9" filter="url(#tide-soft-small)"/>
+  <circle cx="1570" cy="337" r="20" fill="#fbf2e1" opacity="0.88"/>
+
+  <path d="M0 455 C310 446 570 466 820 456 C1090 445 1300 462 1570 452 C1840 442 2100 458 2350 448 L2350 520 L0 520 Z"
+        fill="#c6ccc4" opacity="0.34" filter="url(#tide-soft)"/>
+  <rect y="466" width="2350" height="534" fill="url(#tide-sea)"/>
+
+  <path d="M0 476 C340 470 550 482 810 474 C1110 465 1350 479 1580 470 C1850 460 2140 474 2350 467 L2350 492 L0 492 Z"
+        fill="#d7d8cd" opacity="0.22"/>
+
+  <g fill="none" stroke="#e8e7da" stroke-linecap="round">
+    <path d="M0 520 C240 512 410 524 660 517 S1100 525 1350 516 S1800 522 2350 512" opacity="0.11"/>
+    <path d="M0 548 C290 542 520 554 760 546 S1170 553 1420 544 S1950 550 2350 540" opacity="0.08"/>
+    <path d="M0 586 C330 578 590 592 840 583 S1250 590 1530 581 S2050 588 2350 576" opacity="0.07"/>
+    <path d="M0 632 C380 622 640 636 940 626 S1420 634 1710 623 S2160 630 2350 620" opacity="0.06"/>
+    <path d="M0 688 C340 677 660 691 960 681 S1450 689 1770 678 S2190 686 2350 674" opacity="0.05"/>
+    <path d="M0 754 C400 742 710 758 1020 747 S1540 755 1870 744 S2200 752 2350 740" opacity="0.045"/>
+  </g>
+
+  <g opacity="0.52">
+    <ellipse cx="1570" cy="526" rx="126" ry="16" fill="url(#tide-reflect)" filter="url(#tide-soft-small)"/>
+    <ellipse cx="1562" cy="578" rx="96" ry="26" fill="url(#tide-reflect)" filter="url(#tide-soft-small)"/>
+    <ellipse cx="1578" cy="658" rx="70" ry="40" fill="url(#tide-reflect)" filter="url(#tide-soft-small)"/>
+    <ellipse cx="1552" cy="760" rx="48" ry="58" fill="url(#tide-reflect)" filter="url(#tide-soft-small)"/>
+    <ellipse cx="1580" cy="882" rx="27" ry="74" fill="url(#tide-reflect)" filter="url(#tide-soft-small)"/>
+  </g>
+
+  <path d="M0 862 C280 846 510 872 780 860 C1080 847 1320 868 1600 856 C1870 845 2110 862 2350 848 L2350 1000 L0 1000 Z"
+        fill="#27332f" opacity="0.44" filter="url(#tide-soft-small)"/>
+  <path d="M0 914 C300 896 560 921 850 907 C1130 894 1390 912 1680 900 C1940 889 2160 906 2350 893 L2350 1000 L0 1000 Z"
+        fill="#1d2825" opacity="0.45"/>
+
+  <g fill="#dfe0d6" opacity="0.42">
+    <path d="M505 255 q8 -7 16 0 q8 -6 14 1 q-15 7 -30 -1 Z"/>
+    <path d="M548 281 q6 -5 12 0 q6 -5 11 1 q-12 5 -23 -1 Z"/>
+    <path d="M465 296 q5 -4 10 0 q5 -4 9 1 q-10 4 -19 -1 Z"/>
+  </g>
+
+  <rect width="2350" height="1000" fill="url(#tide-vignette)"/>
+</svg>

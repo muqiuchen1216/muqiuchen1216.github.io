@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" role="img" aria-label="雾岭，山谷里的晨雾">
+  <defs>
+    <linearGradient id="ridge-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e4e3da"/>
+      <stop offset="0.48" stop-color="#d7dcd4"/>
+      <stop offset="1" stop-color="#c3ccc7"/>
+    </linearGradient>
+    <radialGradient id="ridge-light" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f6f1df" stop-opacity="0.85"/>
+      <stop offset="0.5" stop-color="#f1eedf" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#f1eedf" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ridge-far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b8c3be"/>
+      <stop offset="1" stop-color="#a7b4af"/>
+    </linearGradient>
+    <linearGradient id="ridge-mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#879895"/>
+      <stop offset="1" stop-color="#667975"/>
+    </linearGradient>
+    <linearGradient id="ridge-near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4d615c"/>
+      <stop offset="1" stop-color="#2f413d"/>
+    </linearGradient>
+    <linearGradient id="ridge-front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#293b36"/>
+      <stop offset="1" stop-color="#182622"/>
+    </linearGradient>
+    <radialGradient id="ridge-vignette" cx="0.5" cy="0.45" r="0.75">
+      <stop offset="0.5" stop-color="#101712" stop-opacity="0"/>
+      <stop offset="0.82" stop-color="#101712" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#101712" stop-opacity="0.3"/>
+    </radialGradient>
+    <filter id="ridge-blur" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+    <filter id="ridge-blur-small" x="-30%" y="-50%" width="160%" height="200%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="1200" fill="url(#ridge-sky)"/>
+  <circle cx="1140" cy="390" r="480" fill="url(#ridge-light)"/>
+
+  <g filter="url(#ridge-blur)" opacity="0.62">
+    <ellipse cx="440" cy="318" rx="360" ry="54" fill="#e2e2d8"/>
+    <ellipse cx="1380" cy="256" rx="440" ry="44" fill="#e5e3d8"/>
+    <ellipse cx="1010" cy="368" rx="500" ry="46" fill="#d9ddd4"/>
+  </g>
+
+  <path d="M0 660 C130 614 220 640 320 598 C420 556 500 590 590 552 C700 506 790 556 900 520 C1010 484 1090 528 1190 490 C1300 448 1390 508 1500 474 C1600 444 1700 476 1800 448 L1800 1200 L0 1200 Z"
+        fill="url(#ridge-far)" opacity="0.82"/>
+  <path d="M0 690 C170 656 270 681 380 646 C500 608 590 642 700 608 C820 570 900 614 1030 580 C1150 548 1240 594 1370 560 C1490 528 1600 560 1800 522 L1800 1200 L0 1200 Z"
+        fill="url(#ridge-mid)" opacity="0.85"/>
+  <rect y="664" width="1800" height="120" fill="#d9ded6" opacity="0.26" filter="url(#ridge-blur-small)"/>
+
+  <path d="M0 796 C150 760 260 792 400 746 C520 706 620 754 760 708 C880 668 990 718 1120 678 C1250 638 1360 684 1500 654 C1620 628 1710 650 1800 622 L1800 1200 L0 1200 Z"
+        fill="url(#ridge-near)" opacity="0.92"/>
+  <path d="M0 828 C170 794 300 820 430 786 C570 750 680 790 820 756 C950 724 1080 760 1210 730 C1350 698 1460 730 1580 704 C1670 684 1740 692 1800 680 L1800 1200 L0 1200 Z"
+        fill="#d8ddd5" opacity="0.16" filter="url(#ridge-blur-small)"/>
+
+  <path d="M0 1012 C160 972 280 1000 430 956 C570 916 690 958 830 916 C960 878 1080 920 1220 884 C1360 848 1480 882 1610 854 C1690 838 1750 842 1800 828 L1800 1200 L0 1200 Z"
+        fill="url(#ridge-front)"/>
+
+  <g fill="none" stroke="#c8d0c9" stroke-linecap="round" opacity="0.16">
+    <path d="M840 656 C980 632 1140 636 1290 612" stroke-width="1.6"/>
+    <path d="M970 690 C1100 674 1240 678 1390 656" stroke-width="1.2"/>
+    <path d="M690 720 C810 702 930 710 1050 690" stroke-width="1"/>
+  </g>
+
+  <g fill="#e4e3d9" opacity="0.5">
+    <path d="M424 334 q9 -8 18 0 q9 -7 16 2 q-18 7 -34 -2 Z"/>
+    <path d="M470 362 q7 -6 14 0 q7 -5 12 1 q-14 5 -26 -1 Z"/>
+    <path d="M385 383 q6 -5 12 0 q6 -5 10 1 q-12 5 -22 -1 Z"/>
+  </g>
+
+  <rect width="1800" height="1200" fill="url(#ridge-vignette)"/>
+</svg>

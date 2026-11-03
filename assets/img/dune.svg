@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-label="风成，沙丘上的风纹">
+  <defs>
+    <linearGradient id="dune-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e7dac7"/>
+      <stop offset="0.62" stop-color="#ddc9ad"/>
+      <stop offset="1" stop-color="#ceb393"/>
+    </linearGradient>
+    <radialGradient id="dune-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff1d6" stop-opacity="0.72"/>
+      <stop offset="0.5" stop-color="#f4dfc0" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#f4dfc0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="dune-far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d3b997"/>
+      <stop offset="1" stop-color="#b79570"/>
+    </linearGradient>
+    <linearGradient id="dune-mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfc7a6"/>
+      <stop offset="0.55" stop-color="#c6a47e"/>
+      <stop offset="1" stop-color="#a47f5c"/>
+    </linearGradient>
+    <linearGradient id="dune-front" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#e5d2b5"/>
+      <stop offset="0.5" stop-color="#d0b28e"/>
+      <stop offset="1" stop-color="#a48361"/>
+    </linearGradient>
+    <linearGradient id="dune-shadow" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0" stop-color="#8b6a4d" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#60452f" stop-opacity="0.92"/>
+    </linearGradient>
+    <radialGradient id="dune-vignette" cx="0.48" cy="0.42" r="0.78">
+      <stop offset="0.52" stop-color="#2c1f13" stop-opacity="0"/>
+      <stop offset="0.84" stop-color="#2c1f13" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#2c1f13" stop-opacity="0.31"/>
+    </radialGradient>
+    <filter id="dune-blur" x="-30%" y="-50%" width="160%" height="200%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="dune-blur-small" x="-40%" y="-60%" width="180%" height="220%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#dune-sky)"/>
+  <circle cx="460" cy="188" r="520" fill="url(#dune-glow)"/>
+
+  <g filter="url(#dune-blur)" opacity="0.55">
+    <ellipse cx="1220" cy="238" rx="620" ry="46" fill="#ecdeca"/>
+    <ellipse cx="520" cy="302" rx="460" ry="38" fill="#e7d6bf"/>
+  </g>
+
+  <path d="M0 508 C250 462 430 480 640 444 C860 406 1080 460 1280 430 C1470 402 1690 438 1920 398 L1920 1080 L0 1080 Z"
+        fill="url(#dune-far)" opacity="0.9"/>
+  <path d="M0 580 C220 536 440 556 670 514 C890 474 1100 530 1320 494 C1520 462 1710 490 1920 454 L1920 1080 L0 1080 Z"
+        fill="#d2b694" opacity="0.5" filter="url(#dune-blur-small)"/>
+
+  <path d="M0 724 C210 650 440 676 690 610 C900 554 1110 604 1330 562 C1530 524 1730 548 1920 512 L1920 1080 L0 1080 Z"
+        fill="url(#dune-mid)"/>
+  <path d="M0 756 C230 684 450 710 700 646 C910 592 1120 642 1340 600 C1540 562 1730 586 1920 548 L1920 720 C1640 754 1420 738 1180 774 C930 812 700 794 460 846 C290 884 130 874 0 906 Z"
+        fill="#a9845f" opacity="0.38" filter="url(#dune-blur-small)"/>
+
+  <path d="M0 874 C240 792 480 814 740 742 C960 682 1190 724 1420 678 C1600 642 1770 664 1920 630 L1920 1080 L0 1080 Z"
+        fill="url(#dune-front)"/>
+  <path d="M0 900 C230 826 490 852 750 780 C980 716 1200 762 1420 714 C1600 676 1770 700 1920 664 L1920 850 C1680 886 1450 864 1220 906 C990 948 760 914 520 974 C340 1018 160 1002 0 1042 Z"
+        fill="url(#dune-shadow)" opacity="0.76"/>
+
+  <path d="M0 872 C250 790 480 812 740 740 C960 680 1190 722 1420 676 C1600 640 1770 662 1920 628"
+        fill="none" stroke="#f1dfc4" stroke-width="7" opacity="0.36" filter="url(#dune-blur-small)"/>
+
+  <g fill="none" stroke="#f0dfc5" stroke-linecap="round" opacity="0.2">
+    <path d="M80 946 C270 896 470 914 680 866 C900 816 1110 848 1330 808 C1510 776 1690 788 1860 758" stroke-width="2"/>
+    <path d="M120 990 C310 944 500 958 710 912 C930 862 1130 894 1350 854 C1530 822 1700 834 1870 804" stroke-width="1.5"/>
+    <path d="M40 1034 C260 982 440 1000 660 950 C890 898 1090 930 1310 890 C1490 858 1680 870 1890 836" stroke-width="1.2"/>
+    <path d="M240 880 C430 836 620 852 820 812" stroke-width="1"/>
+    <path d="M1030 874 C1210 838 1400 850 1580 818" stroke-width="1"/>
+  </g>
+
+  <g fill="none" stroke="#765438" stroke-linecap="round" opacity="0.13">
+    <path d="M0 1012 C240 960 450 980 680 930 C920 878 1120 910 1350 868 C1550 832 1720 848 1920 810" stroke-width="2"/>
+    <path d="M0 1056 C260 1002 480 1020 710 970 C950 918 1160 948 1380 908 C1580 872 1740 884 1920 850" stroke-width="1.4"/>
+  </g>
+
+  <g opacity="0.8">
+    <ellipse cx="1078" cy="595" rx="26" ry="4" fill="#6c4e35" opacity="0.32" filter="url(#dune-blur-small)"/>
+    <path d="M1072 552 C1075 546 1081 546 1084 552 L1083 572 C1082 578 1074 578 1073 572 Z" fill="#3f3024"/>
+    <path d="M1074 572 C1070 585 1068 594 1069 602 L1073 602 C1074 592 1076 584 1079 576 L1083 576 C1086 584 1088 592 1089 602 L1093 602 C1092 590 1089 580 1085 572 Z" fill="#3f3024"/>
+    <path d="M1072 553 C1070 549 1068 547 1066 546" stroke="#3f3024" stroke-width="1.3" fill="none"/>
+    <path d="M1084 553 C1086 549 1088 547 1090 546" stroke="#3f3024" stroke-width="1.3" fill="none"/>
+  </g>
+
+  <g fill="#5b4230" opacity="0.22">
+    <circle cx="947" cy="619" r="1.6"/>
+    <circle cx="974" cy="614" r="1.5"/>
+    <circle cx="1001" cy="609" r="1.3"/>
+    <circle cx="1027" cy="604" r="1.4"/>
+    <circle cx="1051" cy="600" r="1.2"/>
+  </g>
+
+  <rect width="1920" height="1080" fill="url(#dune-vignette)"/>
+</svg>

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="format-detection" content="telephone=no">
+  <title>工作室 — muqiuchen</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="muqiuchen">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/studio.css">
+  <script defer src="assets/js/data.js"></script>
+  <script defer src="assets/js/store.js"></script>
+  <script defer src="assets/js/studio.js"></script>
+</head>
+<body class="studio-page">
+  <a class="skip-link" href="#studioMain">跳到主要内容</a>
+
+  <header class="studio-header">
+    <div class="studio-header__inner">
+      <a class="studio-brand" href="index.html" aria-label="返回作品集首页">
+        <span class="studio-brand__name" id="studioBrandName">muqiuchen</span>
+        <span class="studio-brand__mark">STUDIO</span>
+      </a>
+      <div class="studio-header__actions">
+        <span class="sync-mode" id="syncMode" data-state="wait">连接中</span>
+        <span class="save-indicator" id="saveIndicator" role="status" aria-live="polite"></span>
+        <a class="button button--ghost button--small" href="index.html" target="_blank" rel="noopener">
+          查看网站
+          <svg class="icon icon--12" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 17 17 7M9 7h8v8"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="lock-screen" id="lockScreen" hidden aria-labelledby="lockTitle">
+    <div class="lock-screen__card">
+      <p class="eyebrow">
+        <span class="eyebrow__dot" aria-hidden="true"></span>
+        <span>Studio / 编辑权限</span>
+      </p>
+      <span class="lock-screen__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M7.5 10.5V8a4.5 4.5 0 0 1 9 0v2.5"></path>
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2.5"></rect>
+          <circle cx="12" cy="15.4" r="1.5"></circle>
+        </svg>
+      </span>
+      <h1 class="lock-screen__title" id="lockTitle">只有这台电脑<br>可以修改内容</h1>
+      <p class="lock-screen__text" id="lockScreenText">
+        你现在是用别的设备打开这个页面的，只能浏览。网站里的资料和作品，只有运行网站的这台电脑能改动。
+      </p>
+      <p class="lock-screen__hint">要修改，请回到那台电脑上打开：</p>
+      <ul class="lock-screen__urls">
+        <li><a href="http://muqiuchen/studio.html" data-unlock="desktop">http://muqiuchen/</a></li>
+        <li><a href="http://127.0.0.1/studio.html" data-unlock="loopback">http://127.0.0.1/</a></li>
+      </ul>
+      <p class="lock-screen__foot">在电脑上改完之后，手机打开网站会自动看到新内容，不用刷新。</p>
+      <div class="lock-screen__actions">
+        <a class="button button--ghost" href="index.html">去首页看看</a>
+        <button class="button button--small" type="button" id="lockRetry">我是这台电脑，重新检查</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="studio-main" id="studioMain" tabindex="-1">
+    <section class="studio-intro" aria-labelledby="studioTitle">
+      <p class="eyebrow">
+        <span class="eyebrow__dot" aria-hidden="true"></span>
+        <span>Studio / 作品管理</span>
+      </p>
+      <div class="studio-intro__grid">
+        <h1 id="studioTitle">把作品，<br>放进光里。</h1>
+        <div class="studio-intro__copy" id="studioIntroCopy">
+          <p>在这里更新摄影师资料、上传与管理作品。保存后首页会<strong>立刻</strong>变成最新的样子，不需要刷新页面。</p>
+          <p class="studio-intro__note">资料与作品保存在这台电脑上（<code>data/</code> 与 <code>media/</code>），不会上传到互联网。同一局域网里的手机、平板打开同一个网址，看到的就是同一份内容，改动会实时同步过去。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="sync-banner" id="syncBanner" role="status" aria-live="polite" hidden>
+      <p class="sync-banner__text" id="syncBannerText"></p>
+      <button class="button button--small" type="button" id="syncBannerAction" hidden>同步到网站</button>
+    </div>
+
+    <section class="studio-locked" id="studioLocked" hidden aria-labelledby="studioLockedTitle">
+      <p class="studio-locked__tag">线上公开版本 · 只读</p>
+      <h2 id="studioLockedTitle">这里看到的就是访客看到的内容</h2>
+      <p class="studio-locked__count" id="studioLockedCount"></p>
+      <ol class="studio-locked__steps">
+        <li>在这台电脑上双击 <strong>启动网站.cmd</strong>，打开 <strong>http://muqiuchen/</strong> 的工作室；</li>
+        <li>在那里改资料、上传照片（会自动保存到 <code>data/</code> 与 <code>media/</code>）；</li>
+        <li>打开 <strong>GitHub Desktop</strong> 提交并推送，Vercel 会自动重新发布，几分钟后线上就是新的。</li>
+      </ol>
+      <p class="studio-locked__note">
+        工作室的编辑功能只在「这台电脑自己运行」的版本里开放：线上是纯静态托管，没有可以写入的后台。
+      </p>
+      <p class="studio-locked__actions">
+        <a class="button" href="index.html">返回作品集首页</a>
+      </p>
+    </section>
+
+    <nav class="studio-jump" aria-label="工作室区块">
+      <a href="#worksPanel">作品上传</a>
+      <a href="#profilePanel">个人资料</a>
+    </nav>
+
+    <div class="storage-warning" id="storageWarning" role="alert" hidden>
+      <strong>浏览器暂时无法保存作品</strong>
+      <p>这可能是因为页面以本地文件方式打开、处于无痕模式，或浏览器禁用了站点数据。请使用项目目录中的「启动网站.cmd」，或按 README 启动本地服务器后重新打开。</p>
+    </div>
+
+    <div class="studio-grid">
+      <aside class="panel profile-panel" id="profilePanel" tabindex="-1" aria-labelledby="profileTitle">
+        <div class="panel__head">
+          <p class="panel__index">01</p>
+          <h2 id="profileTitle">个人资料</h2>
+          <p class="panel__desc">这些文字会出现在首页的名字、关于与联系区域。改动会在停止输入约 1 秒后自动保存并同步到网站；也可以随时点「保存资料」立即保存。</p>
+        </div>
+
+        <form class="profile-form" id="profileForm">
+          <div class="avatar-field">
+            <div class="avatar-preview" id="avatarPreview" aria-hidden="true">
+              <span id="avatarInitial">m</span>
+              <img id="avatarImage" alt="" width="800" height="1000" hidden>
+            </div>
+            <div class="avatar-actions">
+              <button class="text-button" type="button" id="avatarChoose">上传头像</button>
+              <button class="text-button text-button--muted" type="button" id="avatarRemove" hidden>移除</button>
+              <p class="field-hint">建议使用 4:5 竖图，保存时自动压缩。</p>
+            </div>
+            <input class="sr-only" type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" tabindex="-1">
+          </div>
+
+          <label class="field">
+            <span>站点名称 / 域名</span>
+            <input type="text" id="fieldSiteName" maxlength="40" autocomplete="off" placeholder="muqiuchen">
+            <span class="field-hint">显示在首页侧栏与页脚；真实域名需要在托管平台绑定。</span>
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>昵称 / 姓名 <em>必填</em></span>
+              <input type="text" id="fieldName" name="name" maxlength="40" autocomplete="name" placeholder="你的名字" required>
+            </label>
+            <label class="field">
+              <span>英文名 / 拼音</span>
+              <input type="text" id="fieldEnglishName" maxlength="60" autocomplete="off" placeholder="MUQIUCHEN">
+            </label>
+          </div>
+
+          <label class="field">
+            <span>身份标签</span>
+            <input type="text" id="fieldRole" maxlength="60" placeholder="摄影师 / 视觉创作者">
+          </label>
+
+          <label class="field">
+            <span>首页短句</span>
+            <textarea id="fieldTagline" rows="2" maxlength="120" placeholder="把日常，留在光里。"></textarea>
+            <span class="field-hint">支持换行，会显示在首页作品标题下方。</span>
+          </label>
+
+          <label class="field">
+            <span>个人简介</span>
+            <textarea id="fieldBio" rows="6" maxlength="1500" placeholder="写几句关于你和你的摄影。空行会分成两个段落。"></textarea>
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>所在地</span>
+              <input type="text" id="fieldLocation" maxlength="60" placeholder="杭州，中国">
+            </label>
+            <label class="field">
+              <span>开始年份</span>
+              <input type="text" id="fieldSince" maxlength="10" inputmode="numeric" placeholder="2016">
+            </label>
+          </div>
+
+          <label class="field">
+            <span>联系邮箱</span>
+            <input type="email" id="fieldEmail" maxlength="120" autocomplete="email" placeholder="hello@muqiuchen.com">
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>微信号</span>
+              <input type="text" id="fieldWechat" maxlength="60" autocomplete="off" placeholder="微信号">
+              <span class="field-hint">首页联系区会生成一张微信卡片，点一下就能复制。</span>
+            </label>
+            <label class="field">
+              <span>QQ 号</span>
+              <input type="text" id="fieldQq" maxlength="20" inputmode="numeric" autocomplete="off" placeholder="QQ 号">
+              <span class="field-hint">留空即可隐藏这张卡片。</span>
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Instagram</span>
+              <input type="text" id="fieldInstagram" maxlength="80" autocomplete="off" placeholder="账号名">
+            </label>
+            <label class="field">
+              <span>个人网站</span>
+              <input type="text" id="fieldWebsite" maxlength="160" inputmode="url" autocomplete="url" placeholder="https://">
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>抖音号</span>
+              <input type="text" id="fieldDouyin" maxlength="160" autocomplete="off" placeholder="账号或主页链接">
+              <span class="field-hint">可填写抖音号，或粘贴完整主页链接。</span>
+            </label>
+            <label class="field">
+              <span>小红书号</span>
+              <input type="text" id="fieldXiaohongshu" maxlength="160" autocomplete="off" placeholder="账号或主页链接">
+              <span class="field-hint">可填写小红书号，或粘贴完整主页链接。</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="button" type="submit" id="saveProfileButton">保存资料</button>
+            <span class="form-status" id="profileStatus" role="status" aria-live="polite"></span>
+          </div>
+          <p class="profile-next"><a href="#worksPanel">继续到作品上传 <span aria-hidden="true">↓</span></a></p>
+        </form>
+      </aside>
+
+      <section class="panel works-panel" id="worksPanel" tabindex="-1" aria-labelledby="worksTitle">
+        <div class="panel__head panel__head--row">
+          <div>
+            <p class="panel__index">02</p>
+            <h2 id="worksTitle">作品</h2>
+            <p class="panel__desc">每上传一张照片，会自动读取它的原始宽高比，并在首页生成一个新的作品区域。上传后可为每件作品选择作品范围（电影感、场照、棚拍、外景、大合成，或「外景 + 电影感」这个组合类型），以及独立的构图范围（横构图或竖构图）。<strong>调整顺序</strong>：点卡片右上角的 ↑ / ↓ 挪一格，或者<strong>按住卡片约 0.3 秒后直接拖动</strong>——拖到目标位置松手即可，拖到屏幕上下边缘时会自动滚动。</p>
+          </div>
+          <p class="works-total" id="worksTotal">0 件</p>
+        </div>
+
+        <div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="选择或拖入照片上传">
+          <span class="upload-zone__icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+          </span>
+          <p class="upload-zone__title">拖入照片，或点击选择</p>
+          <p class="upload-zone__hint">JPG / PNG / WebP / AVIF&nbsp;&nbsp;·&nbsp;&nbsp;按原图比例生成新区域&nbsp;&nbsp;·&nbsp;&nbsp;长边优化至 2600px</p>
+        </div>
+        <input class="sr-only" type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" multiple tabindex="-1">
+
+        <div class="upload-progress" id="uploadProgress" hidden>
+          <div class="upload-progress__track" aria-hidden="true">
+            <span class="upload-progress__bar" id="uploadBar"></span>
+          </div>
+          <p class="upload-progress__text" id="uploadStatus" role="status" aria-live="polite"></p>
+        </div>
+        <div class="upload-errors" id="uploadErrors" role="alert" hidden></div>
+
+        <div class="works-list" id="worksList"></div>
+
+        <div class="empty-state" id="worksEmpty" hidden>
+          <p class="empty-state__title">还没有上传作品</p>
+          <p>首页目前展示的是示例作品。上传第一张照片后，示例会自动隐藏，并按照这张图的原始画幅生成新区域。</p>
+        </div>
+
+        <div class="storage-note">
+          <svg class="icon icon--12" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"></path>
+            <path d="M4 7l8 4 8-4M12 11v10"></path>
+          </svg>
+          <span id="storageUsage">作品保存在这台电脑上，请保留原始照片备份。</span>
+        </div>
+      </section>
+    </div>
+
+    <footer class="studio-footer">
+      <p>STUDIO · <span id="footerYear">2026</span></p>
+      <p id="footerNote">作品保存在这台电脑上；在「启动网站.cmd」打开的网址里，手机与电脑看到的是同一份内容。</p>
+      <a href="index.html">返回作品集 <span aria-hidden="true">↗</span></a>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

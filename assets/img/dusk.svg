@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2350 1000" role="img" aria-label="薄暮，山脊上的最后一束光">
+  <defs>
+    <linearGradient id="dusk-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a5361"/>
+      <stop offset="0.34" stop-color="#7b7a78"/>
+      <stop offset="0.62" stop-color="#b6977a"/>
+      <stop offset="0.82" stop-color="#d8b489"/>
+      <stop offset="1" stop-color="#e3c69c"/>
+    </linearGradient>
+    <linearGradient id="dusk-far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8b8a8c"/>
+      <stop offset="1" stop-color="#6c6d72"/>
+    </linearGradient>
+    <linearGradient id="dusk-mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5e6169"/>
+      <stop offset="1" stop-color="#43464e"/>
+    </linearGradient>
+    <linearGradient id="dusk-near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#33363d"/>
+      <stop offset="1" stop-color="#1d1f24"/>
+    </linearGradient>
+    <radialGradient id="dusk-sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff4dd" stop-opacity="0.96"/>
+      <stop offset="0.2" stop-color="#fbe3ba" stop-opacity="0.6"/>
+      <stop offset="0.55" stop-color="#eec99a" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#eec99a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="dusk-haze" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e8d6bb" stop-opacity="0"/>
+      <stop offset="0.42" stop-color="#f0dcbe" stop-opacity="0.28"/>
+      <stop offset="0.68" stop-color="#f4e2c6" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#e8d6bb" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="dusk-vignette" cx="0.54" cy="0.44" r="0.78">
+      <stop offset="0.5" stop-color="#0d0f13" stop-opacity="0"/>
+      <stop offset="0.84" stop-color="#0d0f13" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#0b0d10" stop-opacity="0.46"/>
+    </radialGradient>
+    <filter id="dusk-blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+    <filter id="dusk-blur-soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="dusk-blur-tight" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.4"/>
+    </filter>
+  </defs>
+
+  <rect width="2350" height="1000" fill="url(#dusk-sky)"/>
+
+  <!-- 高空云带 -->
+  <g opacity="0.5" filter="url(#dusk-blur)">
+    <ellipse cx="520" cy="150" rx="620" ry="54" fill="#6f7685"/>
+    <ellipse cx="1420" cy="118" rx="720" ry="42" fill="#8d8b90"/>
+    <ellipse cx="2010" cy="214" rx="540" ry="46" fill="#a79484"/>
+    <ellipse cx="980" cy="286" rx="660" ry="38" fill="#c8a98a"/>
+  </g>
+
+  <!-- 落日与光晕 -->
+  <circle cx="1748" cy="470" r="430" fill="url(#dusk-sun)"/>
+  <circle cx="1748" cy="470" r="58" fill="#fff3d8" opacity="0.86" filter="url(#dusk-blur-soft)"/>
+  <circle cx="1748" cy="470" r="24" fill="#fff8e6" opacity="0.9"/>
+
+  <!-- 空气透视：横向雾带 -->
+  <rect x="0" y="392" width="2350" height="180" fill="url(#dusk-haze)" opacity="0.9"/>
+  <rect x="0" y="470" width="2350" height="120" fill="url(#dusk-haze)" opacity="0.7"/>
+
+  <!-- 远山（三层） -->
+  <path d="M0 566 C210 528 372 552 540 522 C700 494 830 516 980 494 C1140 470 1290 502 1450 486 C1620 468 1800 498 1970 480 C2130 464 2240 486 2350 470 L2350 1000 L0 1000 Z"
+        fill="url(#dusk-far)" opacity="0.42" filter="url(#dusk-blur-tight)"/>
+
+  <path d="M0 632 C180 596 330 624 486 600 C660 574 800 604 962 582 C1128 560 1268 592 1432 574 C1604 555 1762 588 1934 570 C2106 552 2240 578 2350 562 L2350 1000 L0 1000 Z"
+        fill="url(#dusk-mid)" opacity="0.66"/>
+
+  <path d="M0 726 C168 694 320 720 470 700 C638 678 792 706 952 686 C1120 665 1262 696 1420 678 C1588 659 1740 690 1904 672 C2070 654 2224 680 2350 664 L2350 1000 L0 1000 Z"
+        fill="url(#dusk-near)" opacity="0.9"/>
+
+  <!-- 山脊受光边 -->
+  <path d="M0 726 C168 694 320 720 470 700 C638 678 792 706 952 686 C1120 665 1262 696 1420 678 C1588 659 1740 690 1904 672 C2070 654 2224 680 2350 664"
+        fill="none" stroke="#e7c79c" stroke-width="3" opacity="0.34" filter="url(#dusk-blur-tight)"/>
+
+  <!-- 最前景的暗部剪影 -->
+  <path d="M0 848 C150 820 300 852 462 834 C640 814 780 846 946 828 C1116 810 1268 840 1436 822 C1604 804 1762 834 1930 816 C2098 798 2232 824 2350 808 L2350 1000 L0 1000 Z"
+        fill="#14161a" opacity="0.92"/>
+
+  <path d="M0 922 C190 900 372 928 566 910 C760 892 940 918 1140 902 C1340 886 1524 912 1720 896 C1906 880 2130 904 2350 890 L2350 1000 L0 1000 Z"
+        fill="#0d0f12" opacity="0.94"/>
+
+  <!-- 低空飞鸟 -->
+  <g fill="none" stroke="#e9d7bb" stroke-linecap="round" opacity="0.34" stroke-width="2.4">
+    <path d="M742 318 q13 -11 26 0 q13 -10 24 1"/>
+    <path d="M826 352 q10 -8 20 0 q10 -8 19 1"/>
+    <path d="M672 366 q8 -7 16 0 q8 -6 15 1"/>
+  </g>
+
+  <!-- 画面整体压边，做出电影调色的层次 -->
+  <rect width="2350" height="1000" fill="url(#dusk-vignette)"/>
+</svg>

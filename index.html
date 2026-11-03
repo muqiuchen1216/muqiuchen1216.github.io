@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="光与影 · 沐秋晨的摄影作品集。记录外景、棚拍与合成影像里的光。">
+  <meta name="format-detection" content="telephone=no">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="光与影 · 沐秋晨 摄影">
+  <meta property="og:description" content="把日常，留在光里。">
+  <title>光与影 · 沐秋晨 摄影</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="muqiuchen">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script>
+    /* 交互脚本可用时先给根元素打标记：滚动入场等效果只在此标记存在时生效。
+       即使脚本没加载成功，2.5 秒后也会自动还原，内容不会被一直隐藏。 */
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('has-js');
+      window.setTimeout(function () {
+        if (!root.classList.contains('motion-ready')) root.classList.remove('has-js');
+      }, 2500);
+    })();
+  </script>
+  <script defer src="assets/js/data.js"></script>
+  <script defer src="assets/js/store.js"></script>
+  <script defer src="assets/js/app.js"></script>
+</head>
+<body class="home-page">
+  <a class="skip-link" href="#works">跳到作品</a>
+
+  <div class="site-shell">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a class="wordmark" href="#top" aria-label="回到首页">
+          <span data-profile="siteName">muqiuchen</span>
+          <span class="wordmark__dot" aria-hidden="true"></span>
+        </a>
+        <nav class="topbar__nav" aria-label="主导航">
+          <a href="#works">作品</a>
+          <a href="#about">关于</a>
+          <a href="#contact">联系</a>
+        </nav>
+        <p class="live-badge" id="liveBadge" data-state="wait" role="status" aria-live="polite">
+          <span class="live-badge__dot" aria-hidden="true"></span>
+          <span class="live-badge__text" id="liveBadgeText">连接中</span>
+        </p>
+        <a class="topbar__studio" href="studio.html">工作室 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main class="page" id="top">
+      <section class="works" id="works" tabindex="-1" aria-labelledby="works-title">
+        <header class="works-header">
+          <div class="works-header__top">
+            <p class="eyebrow">
+              <span class="eyebrow__dot" aria-hidden="true"></span>
+              <span>Selected Works</span>
+            </p>
+            <p class="works-edition">Vol. 01&nbsp;&nbsp;/&nbsp;&nbsp;2026</p>
+          </div>
+
+          <h1 id="works-title">光与<br><em>影。</em></h1>
+
+          <div class="works-header__foot" data-reveal style="--reveal-delay: 140ms">
+            <p class="works-lede" data-profile="tagline">把日常，留在光里。</p>
+            <div class="works-meta">
+              <p data-profile="role">摄影师 / 视觉创作者</p>
+              <p data-profile="location">杭州，中国</p>
+            </div>
+          </div>
+        </header>
+
+        <div class="filters" id="filters" data-reveal style="--reveal-delay: 60ms">
+          <div class="filter-row">
+            <span class="filter-label">构图范围</span>
+            <div class="filter-pills" id="filterComposition" role="group" aria-label="按构图范围筛选">
+              <button class="filter-pill is-active" type="button" data-filter-group="composition" data-filter-value="all" aria-pressed="true">全部</button>
+              <button class="filter-pill" type="button" data-filter-group="composition" data-filter-value="landscape" aria-pressed="false">横构图</button>
+              <button class="filter-pill" type="button" data-filter-group="composition" data-filter-value="portrait" aria-pressed="false">竖构图</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">作品范围</span>
+            <div class="filter-pills" id="filterCategory" role="group" aria-label="按作品范围筛选">
+              <button class="filter-pill is-active" type="button" data-filter-group="category" data-filter-value="all" aria-pressed="true">全部</button>
+              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="cinematic" aria-pressed="false">电影感</button>
+              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="onlocation" aria-pressed="false">场照</button>
+              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="studio" aria-pressed="false">棚拍</button>
+              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="outdoor" aria-pressed="false">外景</button>
+              <button class="filter-pill filter-pill--combo" type="button" data-filter-group="category" data-filter-value="cinematic-outdoor" aria-pressed="false">外景 + 电影感</button>
+              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="composite" aria-pressed="false">大合成</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">拍摄年度</span>
+            <div class="filter-pills" id="filterYear" role="group" aria-label="按拍摄年度筛选">
+              <button class="filter-pill is-active" type="button" data-filter-group="year" data-filter-value="all" aria-pressed="true">全部</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stream-bar" data-reveal style="--reveal-delay: 80ms">
+          <p class="stream-count"><span id="workCount">00</span><span>幅作品</span></p>
+          <button class="random-button" id="randomWork" type="button" title="从当前筛选里随机打开一幅">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 7h4l10 10h4"></path>
+              <path d="M3 17h4l10-10h4"></path>
+              <path d="m18 4 3 3-3 3"></path>
+              <path d="m18 14 3 3-3 3"></path>
+            </svg>
+            <span>随机看一张</span>
+          </button>
+          <p class="stream-note">每张照片按原始画幅生成独立区域</p>
+        </div>
+        <p class="sample-note" id="sampleNote" hidden>示例作品与联系方式 · 在工作室里替换成你自己的</p>
+
+        <div class="gallery-wrap">
+          <div class="gallery" id="gallery"></div>
+          <p class="gallery-status" id="galleryStatus" role="status">正在整理作品…</p>
+        </div>
+
+        <noscript>
+          <p class="noscript">请开启浏览器的 JavaScript 以浏览作品。</p>
+        </noscript>
+      </section>
+
+      <section class="about" id="about" tabindex="-1" aria-labelledby="about-title">
+        <div class="section-top" data-reveal>
+          <p class="eyebrow">
+            <span>02</span>
+            <span class="rule" aria-hidden="true"></span>
+            <span>About</span>
+          </p>
+          <p class="section-location" data-profile="location">杭州，中国</p>
+        </div>
+
+        <div class="about-grid" id="aboutGrid">
+          <div class="about-heading" data-reveal>
+            <h2 id="about-title">关于<br><span class="about-name" data-profile="name">muqiuchen</span></h2>
+            <p class="about-english" data-profile="englishName">MUQIUCHEN</p>
+            <p class="about-role" data-profile="role">摄影师 / 视觉创作者</p>
+          </div>
+
+          <div class="about-content" data-reveal style="--reveal-delay: 110ms">
+            <div class="about-bio" id="aboutBio">
+              <p>独立摄影师，工作与生活于杭州。关注自然、建筑与日常中安静的光线，以克制的构图记录时间留下的痕迹。</p>
+              <p>我相信好照片不需要太多解释，它只是把某一刻的光，安静地留在你面前。</p>
+            </div>
+
+            <dl class="about-facts">
+              <div id="metaLocation">
+                <dt>所在地</dt>
+                <dd data-profile="location">杭州，中国</dd>
+              </div>
+              <div id="metaSince">
+                <dt>开始年份</dt>
+                <dd data-profile="since">2016</dd>
+              </div>
+              <div id="metaEmail">
+                <dt>邮箱</dt>
+                <dd><a id="aboutEmail" href="mailto:hello@muqiuchen.com">hello@muqiuchen.com</a></dd>
+              </div>
+              <div id="metaWechat" hidden>
+                <dt>微信</dt>
+                <dd id="aboutWechat"></dd>
+              </div>
+              <div id="metaQq" hidden>
+                <dt>QQ</dt>
+                <dd id="aboutQq"></dd>
+              </div>
+              <div id="metaInstagram" hidden>
+                <dt>Instagram</dt>
+                <dd><a id="aboutInstagram" href="#" target="_blank" rel="noopener noreferrer"></a></dd>
+              </div>
+              <div id="metaDouyin" hidden>
+                <dt>抖音</dt>
+                <dd><a id="aboutDouyin" href="#" target="_blank" rel="noopener noreferrer"></a></dd>
+              </div>
+              <div id="metaXiaohongshu" hidden>
+                <dt>小红书</dt>
+                <dd><a id="aboutXiaohongshu" href="#" target="_blank" rel="noopener noreferrer"></a></dd>
+              </div>
+              <div id="metaWebsite" hidden>
+                <dt>网站</dt>
+                <dd><a id="aboutWebsite" href="#" target="_blank" rel="noopener noreferrer"></a></dd>
+              </div>
+            </dl>
+          </div>
+
+          <figure class="about-portrait" id="aboutPortrait" hidden>
+            <img id="aboutAvatar" alt="摄影师头像" width="800" height="1000">
+            <figcaption data-profile="name">muqiuchen</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="contact" id="contact" tabindex="-1" aria-labelledby="contact-title">
+        <div class="contact__inner">
+          <div class="contact__top" data-reveal>
+            <p class="eyebrow eyebrow--dark">
+              <span>03</span>
+              <span class="rule" aria-hidden="true"></span>
+              <span>Contact</span>
+            </p>
+            <p class="contact__location" data-profile="location">杭州，中国</p>
+          </div>
+
+          <div class="contact__grid">
+            <h2 id="contact-title" data-reveal>一起留下<br>一点光。</h2>
+            <div class="contact__body" data-reveal style="--reveal-delay: 110ms">
+              <p class="contact__lede">扩列、约拍、互免，欢迎加微信找我。</p>
+              <button class="contact__email" id="contactWechat" type="button" title="点击复制微信号" hidden>muqiuchen1216</button>
+              <p class="contact__hint" id="contactWechatHint" hidden>点击微信号即可复制</p>
+              <div class="contact__links">
+                <a id="contactInstagram" href="#" target="_blank" rel="noopener noreferrer" hidden>Instagram <span aria-hidden="true">↗</span></a>
+                <a id="contactWebsite" href="#" target="_blank" rel="noopener noreferrer" hidden>个人网站 <span aria-hidden="true">↗</span></a>
+              </div>
+            </div>
+          </div>
+
+          <ul class="contact__cards" id="contactCards" data-reveal style="--reveal-delay: 150ms"></ul>
+
+          <footer class="site-footer" data-reveal>
+            <p>© <span id="footerYear">2026</span> <span data-profile="siteName">muqiuchen</span></p>
+            <p class="site-footer__note">All photographs are protected by copyright.</p>
+            <a class="back-top" href="#top">回到顶部 <span aria-hidden="true">↑</span></a>
+          </footer>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lbTitle" aria-hidden="true" inert>
+    <div class="lightbox__backdrop" aria-hidden="true"></div>
+
+    <div class="lightbox__shell">
+      <header class="lightbox__bar">
+        <div class="lightbox__status">
+          <span id="lbCounter" aria-live="polite">01 / 06</span>
+          <span class="lightbox__ratio" id="lbRatio">3 : 2</span>
+        </div>
+        <div class="lightbox__tools">
+          <button class="lb-button" id="lbZoom" type="button" aria-label="放大图片" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+              <path class="zoom-plus-v" d="M11 8v6"></path>
+              <path d="M8 11h6"></path>
+            </svg>
+          </button>
+          <button class="lb-button" id="lbClose" type="button" aria-label="关闭大图">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 5l14 14M19 5 5 19"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="lightbox__main">
+        <button class="lightbox__nav lightbox__nav--prev" id="lbPrev" type="button" aria-label="上一幅作品">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 7 12l8 8"></path>
+          </svg>
+        </button>
+
+        <div class="lightbox__stage" id="lbStage" tabindex="-1">
+          <div class="lightbox__loader" id="lbLoader" aria-hidden="true"><span></span></div>
+          <img class="lightbox__image" id="lbImage" alt="" draggable="false" decoding="async">
+          <div class="lightbox__error" id="lbError" role="alert" hidden>
+            <p>图片没有成功载入。</p>
+            <button class="button button--ghost button--small" id="lbRetry" type="button">重新加载</button>
+          </div>
+        </div>
+
+        <button class="lightbox__nav lightbox__nav--next" id="lbNext" type="button" aria-label="下一幅作品">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9 4 8 8-8 8"></path>
+          </svg>
+        </button>
+      </div>
+
+      <footer class="lightbox__meta" id="lbMeta">
+        <div class="lightbox__copy">
+          <p class="lightbox__kicker" id="lbKicker">作品说明</p>
+          <h2 class="lightbox__title" id="lbTitle">—</h2>
+          <p class="lightbox__title-en" id="lbTitleEn"></p>
+          <p class="lightbox__desc" id="lbDesc"></p>
+          <p class="lightbox__place"><span id="lbLocation"></span><span class="lightbox__dot" aria-hidden="true">·</span><span id="lbYear"></span></p>
+        </div>
+        <p class="lightbox__hint">点击 / 双指缩放&nbsp;&nbsp;·&nbsp;&nbsp;左右滑动切换</p>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

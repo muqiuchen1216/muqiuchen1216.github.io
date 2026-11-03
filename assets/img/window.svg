@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1800" role="img" aria-label="午后，墙上的光">
+  <defs>
+    <linearGradient id="room-wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b7a58e"/>
+      <stop offset="0.55" stop-color="#c6b59d"/>
+      <stop offset="1" stop-color="#d8c7ac"/>
+    </linearGradient>
+    <linearGradient id="room-floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f7b63"/>
+      <stop offset="1" stop-color="#5c4d3d"/>
+    </linearGradient>
+    <linearGradient id="light-patch" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#f8edd8" stop-opacity="0.92"/>
+      <stop offset="0.6" stop-color="#edd9b8" stop-opacity="0.76"/>
+      <stop offset="1" stop-color="#e4cda9" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="curtain" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#73745f"/>
+      <stop offset="0.48" stop-color="#5c5e4d"/>
+      <stop offset="1" stop-color="#3f4136"/>
+    </linearGradient>
+    <linearGradient id="vase" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stop-color="#77715f"/>
+      <stop offset="0.55" stop-color="#4e4b3f"/>
+      <stop offset="1" stop-color="#34332b"/>
+    </linearGradient>
+    <radialGradient id="room-vignette" cx="0.52" cy="0.42" r="0.78">
+      <stop offset="0.55" stop-color="#17140f" stop-opacity="0"/>
+      <stop offset="0.85" stop-color="#17140f" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#17140f" stop-opacity="0.3"/>
+    </radialGradient>
+    <filter id="room-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="room-soft-small" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <clipPath id="light-clip">
+      <path d="M286 238 C470 258 790 304 1030 342 L884 1398 C690 1360 438 1318 218 1264 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="1800" fill="url(#room-wall)"/>
+  <rect y="1508" width="1200" height="292" fill="url(#room-floor)"/>
+  <path d="M0 1508 H1200" stroke="#4e4133" stroke-width="7" opacity="0.36"/>
+  <path d="M0 1542 H1200" stroke="#3f3429" stroke-width="3" opacity="0.24"/>
+
+  <g clip-path="url(#light-clip)">
+    <path d="M286 238 C470 258 790 304 1030 342 L884 1398 C690 1360 438 1318 218 1264 Z" fill="url(#light-patch)"/>
+    <g opacity="0.36" filter="url(#room-soft-small)">
+      <path d="M548 270 C578 274 604 280 628 284 L548 1352 C506 1344 480 1338 452 1332 Z" fill="#6d5944"/>
+      <path d="M280 760 C500 800 760 840 1034 884 L1016 936 C748 892 500 854 264 814 Z" fill="#6d5944"/>
+    </g>
+    <path d="M286 238 C470 258 790 304 1030 342 L884 1398 C690 1360 438 1318 218 1264 Z"
+          fill="none" stroke="#f6e8ce" stroke-width="8" opacity="0.22" filter="url(#room-soft-small)"/>
+  </g>
+
+  <g opacity="0.55" filter="url(#room-soft)">
+    <ellipse cx="704" cy="1228" rx="310" ry="460" fill="#e9d3af"/>
+  </g>
+
+  <path d="M963 0 C925 190 948 352 925 526 C902 700 934 870 906 1046 C886 1178 906 1344 876 1508 L1200 1508 L1200 0 Z"
+        fill="url(#curtain)"/>
+  <g opacity="0.22" filter="url(#room-soft-small)">
+    <path d="M942 20 C916 220 936 414 916 600 C898 774 922 964 898 1148 C884 1268 896 1396 878 1508" fill="none" stroke="#c8c4aa" stroke-width="17"/>
+    <path d="M994 10 C972 226 990 430 972 624 C954 812 978 994 958 1172 C946 1290 958 1412 944 1508" fill="none" stroke="#303228" stroke-width="12"/>
+    <path d="M1056 0 C1040 246 1054 446 1038 650 C1026 828 1046 1004 1030 1182 C1020 1312 1034 1420 1022 1508" fill="none" stroke="#b7b39c" stroke-width="9"/>
+  </g>
+
+  <ellipse cx="752" cy="1496" rx="156" ry="30" fill="#3c3026" opacity="0.34" filter="url(#room-soft)"/>
+
+  <path d="M690 1224 C692 1278 666 1312 661 1372 C654 1454 702 1488 760 1488 C818 1488 864 1454 857 1372 C852 1312 826 1278 828 1224 Z"
+        fill="url(#vase)"/>
+  <ellipse cx="759" cy="1225" rx="69" ry="17" fill="#3a382e"/>
+  <ellipse cx="759" cy="1223" rx="53" ry="10" fill="#1f201a"/>
+  <path d="M711 1268 C700 1322 688 1374 700 1420 C707 1445 727 1458 744 1462 C724 1432 718 1394 724 1354 C730 1310 740 1286 742 1258 Z"
+        fill="#b4ae98" opacity="0.2"/>
+  <path d="M801 1246 C824 1276 832 1316 828 1366 C825 1408 817 1438 803 1462 C820 1448 836 1420 842 1382 C850 1330 832 1272 801 1246 Z"
+        fill="#171813" opacity="0.22"/>
+
+  <g fill="#f2e2c7" opacity="0.6">
+    <circle cx="470" cy="584" r="2.2"/>
+    <circle cx="548" cy="442" r="1.5"/>
+    <circle cx="688" cy="520" r="1.7"/>
+    <circle cx="802" cy="636" r="2"/>
+    <circle cx="394" cy="742" r="1.4"/>
+    <circle cx="620" cy="850" r="1.6"/>
+    <circle cx="486" cy="944" r="1.1"/>
+    <circle cx="742" cy="1004" r="1.4"/>
+  </g>
+
+  <rect y="1508" width="1200" height="292" fill="#3b2f24" opacity="0.12"/>
+  <rect width="1200" height="1800" fill="url(#room-vignette)"/>
+</svg>

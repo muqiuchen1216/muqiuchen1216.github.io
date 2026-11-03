@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1400" role="img" aria-label="静物，一只陶罐与一枝尤加利">
+  <defs>
+    <linearGradient id="still-wall" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#ddd5c6"/>
+      <stop offset="0.52" stop-color="#d3c9b8"/>
+      <stop offset="1" stop-color="#bbae9a"/>
+    </linearGradient>
+    <linearGradient id="still-table" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7a68f"/>
+      <stop offset="0.4" stop-color="#a08e77"/>
+      <stop offset="1" stop-color="#786855"/>
+    </linearGradient>
+    <linearGradient id="still-vase" x1="0" y1="0" x2="1" y2="0.2">
+      <stop offset="0" stop-color="#9a8f7c"/>
+      <stop offset="0.28" stop-color="#b3a791"/>
+      <stop offset="0.7" stop-color="#6e6555"/>
+      <stop offset="1" stop-color="#4b4639"/>
+    </linearGradient>
+    <radialGradient id="still-light" cx="0.34" cy="0.28" r="0.7">
+      <stop offset="0" stop-color="#fff6e6" stop-opacity="0.6"/>
+      <stop offset="0.54" stop-color="#f6ecd9" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#f6ecd9" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="still-vignette" cx="0.5" cy="0.44" r="0.75">
+      <stop offset="0.5" stop-color="#1d1913" stop-opacity="0"/>
+      <stop offset="0.82" stop-color="#1d1913" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#1d1913" stop-opacity="0.32"/>
+    </radialGradient>
+    <filter id="still-blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="still-blur-small" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <path id="still-leaf" d="M0 0 C12 -11 34 -10 47 0 C34 10 12 11 0 0 Z"/>
+  </defs>
+
+  <rect width="1400" height="1400" fill="url(#still-wall)"/>
+  <rect width="1400" height="1400" fill="url(#still-light)"/>
+  <path d="M0 1000 H1400 V1400 H0 Z" fill="url(#still-table)"/>
+  <path d="M0 1004 H1400" stroke="#5d5040" stroke-width="3" opacity="0.32"/>
+  <path d="M0 1280 H1400" stroke="#4a3f32" stroke-width="2" opacity="0.18"/>
+
+  <g opacity="0.28" filter="url(#still-blur)">
+    <ellipse cx="1010" cy="1152" rx="300" ry="38" fill="#4a3b2d"/>
+    <path d="M780 1112 C850 1136 1000 1134 1050 1108" stroke="#3f3125" stroke-width="30" fill="none"/>
+  </g>
+
+  <g fill="none" stroke-linecap="round">
+    <path d="M700 792 C688 690 654 604 606 512 C572 446 546 360 558 256" stroke="#505044" stroke-width="5" opacity="0.9"/>
+    <path d="M652 600 C710 558 772 538 858 512" stroke="#565547" stroke-width="3.2" opacity="0.85"/>
+    <path d="M620 500 C560 458 502 430 438 412" stroke="#565547" stroke-width="3" opacity="0.85"/>
+    <path d="M604 408 C654 378 713 344 772 314" stroke="#5b5a4b" stroke-width="2.5" opacity="0.8"/>
+    <path d="M576 332 C544 298 508 278 470 268" stroke="#5b5a4b" stroke-width="2.2" opacity="0.75"/>
+    <path d="M620 568 C600 540 580 516 552 498" stroke="#5b5a4b" stroke-width="2" opacity="0.65"/>
+    <path d="M690 700 C704 664 730 632 758 612" stroke="#5b5a4b" stroke-width="2" opacity="0.58"/>
+  </g>
+
+  <g fill="#676653" opacity="0.82">
+    <use href="#still-leaf" transform="translate(842 508) rotate(-18) scale(0.92)"/>
+    <use href="#still-leaf" transform="translate(786 528) rotate(10) scale(0.7)"/>
+    <use href="#still-leaf" transform="translate(436 407) rotate(-8) scale(0.86)"/>
+    <use href="#still-leaf" transform="translate(486 426) rotate(24) scale(0.62)"/>
+    <use href="#still-leaf" transform="translate(760 302) rotate(-38) scale(0.8)"/>
+    <use href="#still-leaf" transform="translate(548 252) rotate(-72) scale(0.72)"/>
+    <use href="#still-leaf" transform="translate(474 263) rotate(-26) scale(0.62)"/>
+    <use href="#still-leaf" transform="translate(548 493) rotate(40) scale(0.56)"/>
+    <use href="#still-leaf" transform="translate(760 607) rotate(-54) scale(0.55)"/>
+    <use href="#still-leaf" transform="translate(700 350) rotate(-86) scale(0.5)"/>
+    <use href="#still-leaf" transform="translate(646 660) rotate(22) scale(0.58)"/>
+  </g>
+
+  <g fill="none" stroke="#3f3e32" stroke-width="1" opacity="0.28">
+    <path d="M848 505 L890 498"/>
+    <path d="M438 409 L398 404"/>
+    <path d="M766 300 L720 283"/>
+  </g>
+
+  <path d="M665 812 C666 876 612 914 602 1000 C590 1094 634 1144 700 1144 C766 1144 810 1094 798 1000 C788 914 734 876 735 812 Z"
+        fill="url(#still-vase)"/>
+  <ellipse cx="700" cy="812" rx="56" ry="16" fill="#514b3f"/>
+  <ellipse cx="700" cy="810" rx="41" ry="8" fill="#27251f"/>
+  <path d="M653 846 C638 906 626 970 642 1030 C651 1066 672 1090 692 1104 C666 1064 656 1018 664 968 C672 920 686 884 690 842 Z"
+        fill="#e3d8c2" opacity="0.18"/>
+  <path d="M755 830 C780 874 789 930 783 990 C778 1044 762 1088 738 1120 C772 1098 794 1056 799 1006 C806 950 790 880 755 830 Z"
+        fill="#22211b" opacity="0.22"/>
+
+  <g opacity="0.2" filter="url(#still-blur-small)">
+    <path d="M700 790 C688 690 654 604 606 512 C572 446 546 360 558 256" stroke="#3c3428" stroke-width="10" fill="none"/>
+    <path d="M652 600 C710 558 772 538 858 512" stroke="#3c3428" stroke-width="8" fill="none"/>
+  </g>
+
+  <g fill="#f3ead9" opacity="0.45">
+    <circle cx="468" cy="615" r="2"/>
+    <circle cx="844" cy="736" r="1.5"/>
+    <circle cx="362" cy="782" r="1.4"/>
+    <circle cx="1108" cy="624" r="1.6"/>
+    <circle cx="1000" cy="830" r="1.2"/>
+    <circle cx="588" cy="886" r="1.1"/>
+  </g>
+
+  <rect width="1400" height="1400" fill="url(#still-vignette)"/>
+</svg>
