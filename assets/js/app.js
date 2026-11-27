@@ -1825,15 +1825,23 @@
       window.PortfolioCloud && typeof window.PortfolioCloud.canWrite === 'function' && window.PortfolioCloud.canWrite()
     );
 
+    /* 站长入口的显示规则：
+       - 已连令牌 → 全显示（顶栏、联系区、页脚）
+       - 没连令牌 → 只保留一个「极不显眼」的小入口（页脚一行小字）
+
+       为什么不能全藏：手机重装 APP、清缓存、换手机之后，localStorage 是空的，
+       令牌就没了。如果入口全藏，用户永远进不去工作室，也就没法重新粘令牌 ——
+       等于把自己锁在门外。所以页脚那一条必须一直在，但它小到访客不会注意。
+    */
     var dock = document.getElementById('ownerDock');
     if (dock) dock.hidden = !writable;
 
     var topbarStudio = document.querySelector('.topbar__studio');
     if (topbarStudio) topbarStudio.hidden = !writable;
 
-    /* 页脚那个「进工作室改作品」链接同理 */
+    /* 页脚始终显示 —— 这是「没令牌时唯一的进门路」 */
     var footerStudio = document.querySelector('.site-footer__admin');
-    if (footerStudio) footerStudio.hidden = !writable;
+    if (footerStudio) footerStudio.hidden = false;
   }
 
   function setupReveal() {

@@ -1654,6 +1654,8 @@
     var count = document.getElementById('bulkCount');
     if (count) count.textContent = String(picked.length);
     bar.hidden = picked.length === 0;
+    /* 批量栏固定在屏幕底部，出现时给列表底部留出空间，别遮住最后一张卡片 */
+    document.body.classList.toggle('has-bulk-bar', picked.length > 0);
   }
 
   function clearPicks() {

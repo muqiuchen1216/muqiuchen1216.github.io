@@ -2787,3 +2787,116 @@ body.is-dragging-work .works-list {
     font-size: 14px;
   }
 }
+
+/* =========================================================
+   修复：多选框与拖动把手重叠
+   ---------------------------------------------------------
+   原来两者都在左上角 (6px, 6px)，完全叠在一起，
+   点下去不知道是选中还是拖动。
+   现在分开：
+     - 拖动把手：左上角（保持不动）
+     - 多选框：右上角
+   比例标记原来在右上角，挪到右下角（不挡把手也不挡多选）。
+   ========================================================= */
+
+.work-editor__pick {
+  left: auto !important;
+  right: 6px !important;
+  top: 6px !important;
+}
+
+/* 比例标记从右上挪到右下，给多选框让位 */
+.work-editor__ratio {
+  top: auto !important;
+  right: 6px !important;
+  bottom: 6px !important;
+}
+
+@media (pointer: coarse) {
+  .work-editor__pick {
+    right: 5px !important;
+    top: 5px !important;
+  }
+
+  .work-editor__ratio {
+    right: 5px !important;
+    bottom: 5px !important;
+  }
+}
+
+/* =========================================================
+   修复：批量操作栏必须「固定在屏幕底部」
+   ---------------------------------------------------------
+   原来是 position: sticky + bottom: 12px，但它在 DOM 里位于列表之前，
+   滚动到列表下方时它早就滚出视野了 —— 用户在底部勾了图，
+   还得滚回最上面才能点删除。
+   改成 position: fixed：始终贴在屏幕底部中间，
+   勾选任何位置的图片都能立刻点到「一键删除」。
+   ========================================================= */
+
+.bulk-bar {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+  transform: translateX(-50%);
+  z-index: 300 !important;
+  width: min(540px, calc(100vw - 28px));
+  margin: 0 !important;
+  padding: 13px 16px;
+  border: 1.5px solid rgba(212, 180, 120, 0.65);
+  border-radius: 16px;
+  background: #1a1d22;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65);
+  animation: bulk-bar-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bulk-bar-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 手机上按钮占满一行，更好点 */
+@media (max-width: 560px) {
+  .bulk-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: calc(100vw - 24px);
+  }
+
+  .bulk-bar__info {
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .bulk-bar__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .bulk-bar__actions .button {
+    width: 100%;
+    justify-content: center;
+    min-height: 46px;
+    font-size: 14.5px;
+  }
+}
+
+/* 批量栏出现时，给列表底部留出空间，避免遮住最后一张卡片 */
+body.has-bulk-bar .works-list {
+  padding-bottom: 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulk-bar {
+    animation: none;
+  }
+}
