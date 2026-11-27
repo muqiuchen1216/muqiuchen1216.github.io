@@ -1100,9 +1100,9 @@
        以前窄屏也强制两列：每列只有 175px，横图缩成小条、
        竖图却高达 270px，两列累高差被放大，中间留出大片空白，
        标签也挤在一起看不清。单列图大、标签清楚、瀑布流也不会空。 */
-    var columns = width < 720 ? 1 : 2;
+    var columns = width < 300 ? 1 : 2;
     var columnGap = width >= 1100 ? 28 : width >= 640 ? 16 : 8;
-    var verticalGap = width >= 640 ? 38 : 16;
+    var verticalGap = width >= 640 ? 38 : 18;
     /* 标签叠在图片底部，不再占额外高度。 */
     var captionHeight = 0;
     var columnWidth = (width - columnGap * (columns - 1)) / columns;
@@ -1813,6 +1813,29 @@
      二次优化：入场、指针与滚动到视区时的动效
      ========================================================= */
 
+  /* 站长入口：只有「这台设备连过令牌」时才显示。
+     访客打开首页永远看不到「工作室」「装到主屏」这两个按钮 ——
+     那是站长自己的工具，不该出现在公开网站上。 */
+  /* 站长入口：只有「这台设备连过令牌」时才显示。
+     访客打开首页永远看不到「工作室」「装到主屏」这两个按钮 ——
+     那是站长自己的工具，不该出现在公开网站上。
+     顶栏右上角那枚「工作室 ↗」也一起藏起来。 */
+  function setupOwnerDock() {
+    var writable = Boolean(
+      window.PortfolioCloud && typeof window.PortfolioCloud.canWrite === 'function' && window.PortfolioCloud.canWrite()
+    );
+
+    var dock = document.getElementById('ownerDock');
+    if (dock) dock.hidden = !writable;
+
+    var topbarStudio = document.querySelector('.topbar__studio');
+    if (topbarStudio) topbarStudio.hidden = !writable;
+
+    /* 页脚那个「进工作室改作品」链接同理 */
+    var footerStudio = document.querySelector('.site-footer__admin');
+    if (footerStudio) footerStudio.hidden = !writable;
+  }
+
   function setupReveal() {
     var targets = $all('[data-reveal]');
     if (!targets.length) return;
@@ -2293,6 +2316,7 @@
     setupGalleryClicks();
     setupGalleryResize();
     setupLightbox();
+    setupOwnerDock();
     setupReveal();
     setupCardTilt();
     setupNavHighlight();

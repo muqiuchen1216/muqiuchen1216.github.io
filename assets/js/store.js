@@ -259,6 +259,9 @@
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'visible') poll();
     });
+    /* 窗口重新获得焦点时也立刻查一次：
+       从别的标签页切回来、或从后台唤醒时，不用等下一轮轮询。 */
+    window.addEventListener('focus', poll);
   }
 
   /* ---------- 服务器接口 ---------- */

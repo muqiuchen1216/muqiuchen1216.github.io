@@ -225,7 +225,8 @@
           <ul class="contact__cards" id="contactCards" data-reveal style="--reveal-delay: 150ms"></ul>
 
           <!-- 站长入口：装成 APP 后最需要的两个动作，放在联系区下面，不用回头找顶栏 -->
-          <section class="owner-dock" data-reveal aria-label="站长工具">
+          <!-- 站长入口：默认隐藏，只有「已连令牌的设备」才显示（见 app.js 的 setupOwnerDock） -->
+          <section class="owner-dock" id="ownerDock" data-reveal aria-label="站长工具" hidden>
             <p class="owner-dock__label">站长入口</p>
             <div class="owner-dock__row">
               <a class="owner-dock__btn owner-dock__btn--primary" href="studio.html">

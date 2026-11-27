@@ -3144,3 +3144,52 @@ html {
 .work-entry__meta {
   position: absolute;
 }
+
+/* =========================================================
+   去掉金色分隔线 + 恢复两列
+   ---------------------------------------------------------
+   1. 用户反馈：那根金线很破坏美观 —— 去掉。
+      叠层标签本身已经能表达归属，不需要额外加线。
+   2. 用户更喜欢两列排版（一列要翻太久）。
+      两列的空白问题之前已经修好（position: absolute），
+      所以恢复两列不会再出现大片空白。
+   ========================================================= */
+
+.work-entry__meta::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* 两列时标题稍小一点，避免溢出 */
+@media (max-width: 719px) {
+  .work-entry__title {
+    font-size: 13.5px;
+  }
+
+  .work-entry__sub {
+    font-size: 8.5px;
+  }
+
+  .work-entry__meta {
+    padding: 24px 9px 8px !important;
+  }
+
+  .work-entry__index {
+    font-size: 7.5px;
+  }
+
+  .work-entry__ratio {
+    right: 7px;
+    top: 7px;
+    font-size: 7px;
+    padding: 2px 6px;
+  }
+}
+
+/* hidden 属性对 flex / inline-flex 元素不生效（display 会被 CSS 覆盖），
+   站长入口默认要藏起来，这里确保它真的不显示。 */
+.topbar__studio[hidden],
+.site-footer__admin[hidden],
+.owner-dock[hidden] {
+  display: none !important;
+}
