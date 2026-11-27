@@ -33,6 +33,8 @@
     installButton.type = 'button';
     installButton.id = 'installFab';
     installButton.className = 'install-fab';
+    /* 建出来先藏起来，由 showButton() 决定要不要露脸 */
+    installButton.hidden = true;
     installButton.innerHTML = '<span aria-hidden="true">⬇</span> 装到主屏';
     installButton.title = '把「光与影」装到手机主屏，像 APP 一样打开';
     installButton.addEventListener('click', function () {
@@ -62,6 +64,12 @@
   }
 
   function showButton() {
+    /* 「装到主屏」是站长自己的工具，访客不该看到。
+       只有这台设备连过令牌（也就是站长本人）才显示。 */
+    var writable = Boolean(
+      window.PortfolioCloud && typeof window.PortfolioCloud.canWrite === 'function' && window.PortfolioCloud.canWrite()
+    );
+    if (!writable) return;
     var button = ensureButton();
     if (button) button.hidden = false;
   }
