@@ -95,14 +95,50 @@
         </p>
 
         <form class="cloud-form" id="cloudForm">
+          <div class="token-help">
+            <p class="token-help__title">还没有令牌？按这里生成一个</p>
+            <p class="token-help__text">
+              点下面的按钮会打开 GitHub 的生成页面（已帮你填好名字和有效期），
+              你只需要做两件事：<strong>选仓库</strong>、<strong>把 Contents 设成 Read and write</strong>。
+            </p>
+            <div class="token-help__actions">
+              <a class="button button--ghost" id="tokenGenerateLink"
+                 href="https://github.com/settings/personal-access-tokens/new"
+                 target="_blank" rel="noopener">
+                打开 GitHub 生成令牌 ↗
+              </a>
+            </div>
+            <details class="token-help__steps">
+              <summary>看图照做：详细三步</summary>
+              <ol class="token-steps">
+                <li>
+                  <b>Repository access</b> 选 <b>Only select repositories</b>，
+                  下拉里只勾 <b>muqiuchen1216.github.io</b>。
+                </li>
+                <li>
+                  展开 <b>Repository permissions</b>，找到 <b>Contents</b>，
+                  右边改成 <b>Read and write</b>。（Metadata 会自动变成只读，不用管）
+                </li>
+                <li>
+                  滑到最下面点绿色 <b>Generate token</b>，
+                  把出现的那一长串（<code>github_pat_</code> 开头）复制下来，
+                  粘到下面的框里。
+                </li>
+              </ol>
+              <p class="token-steps__warn">
+                那一串<strong>只显示这一次</strong>，关掉页面就再也看不到了。
+                复制后直接粘到下面，不要截图外传。
+              </p>
+            </details>
+          </div>
+
           <label class="field">
-            <span>GitHub 令牌 <em>必填</em></span>
+            <span>把令牌粘贴到这里 <em>必填</em></span>
             <input type="password" id="fieldToken" autocomplete="off" spellcheck="false"
-                   placeholder="ghp_ 或 github_pat_ 开头的一长串">
+                   inputmode="text"
+                   placeholder="github_pat_ 开头的一长串">
             <span class="field-hint">
-              在 GitHub 网页上生成：Settings → Developer settings → Personal access tokens →
-              Fine-grained tokens → 新建，权限只勾 <strong>Contents: Read and write</strong>，
-              仓库只选 <strong>muqiuchen1216.github.io</strong>。
+              粘贴后直接点下面的「连接」即可。这个框里保存的令牌只留在这台设备上。
             </span>
           </label>
 

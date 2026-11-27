@@ -1841,3 +1841,431 @@ body.is-dragging-work .work-editor {
 .work-editor.is-dragging .work-editor__thumb img {
   filter: blur(1.5px) saturate(1.04);
 }
+
+/* =========================================================
+   连接页放大版（手机上要能看清、能点中）
+   ---------------------------------------------------------
+   原来正文字号 12.5~14px，手机上偏小；输入框 8px 内边距也偏窄。
+   这里整体放大一档，并给触屏留出足够的点击高度。
+   ========================================================= */
+
+.cloud-setup {
+  max-width: 760px;
+}
+
+.cloud-setup__card {
+  padding: clamp(26px, 5vw, 44px);
+  border-radius: 20px;
+}
+
+.cloud-setup__title {
+  font-size: clamp(34px, 8vw, 52px);
+  line-height: 1.18;
+  margin: 18px 0 22px;
+}
+
+.cloud-setup__lead {
+  font-size: clamp(16px, 4.2vw, 18px);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.cloud-setup__note {
+  font-size: clamp(14px, 3.6vw, 15.5px);
+  line-height: 1.8;
+  padding: 16px 18px;
+  border-left-width: 3px;
+  border-radius: 0 10px 10px 0;
+}
+
+.cloud-form .field {
+  margin-bottom: 26px;
+}
+
+.cloud-form .field > span:first-child {
+  font-size: clamp(16px, 4.2vw, 18px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.cloud-form .field-hint {
+  display: block;
+  margin-top: 10px;
+  font-size: clamp(13.5px, 3.5vw, 15px);
+  line-height: 1.75;
+  opacity: 0.72;
+}
+
+/* 令牌输入框：够高、字够大、等宽字体便于核对 */
+#fieldToken {
+  min-height: 58px;
+  padding: 15px 16px !important;
+  border: 1.5px solid rgba(200, 168, 107, 0.45) !important;
+  border-radius: 12px;
+  background: rgba(10, 11, 13, 0.04);
+  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+  font-size: 16px !important;
+  letter-spacing: 0.01em;
+}
+
+#fieldToken:focus {
+  border-color: var(--accent, #c8a86b) !important;
+  background: rgba(200, 168, 107, 0.06);
+}
+
+.cloud-form .button,
+.cloud-form .form-actions .button {
+  min-height: 54px;
+  padding: 15px 30px;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.cloud-advanced {
+  padding: 16px 18px;
+  border-radius: 14px;
+}
+
+.cloud-advanced > summary {
+  font-size: clamp(14px, 3.6vw, 15.5px);
+}
+
+.cloud-setup__foot {
+  margin-top: 26px;
+  font-size: clamp(14px, 3.6vw, 15px);
+  line-height: 1.7;
+}
+
+/* 手机上让「连接」按钮占满整行，好点 */
+@media (max-width: 560px) {
+  .cloud-form .form-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .cloud-form .form-actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cloud-form .form-status {
+    text-align: center;
+    font-size: 15px;
+  }
+}
+
+/* ---------- 生成令牌的引导块 ---------- */
+
+.token-help {
+  margin: 0 0 26px;
+  padding: clamp(18px, 4vw, 24px);
+  border: 1.5px solid rgba(200, 168, 107, 0.4);
+  border-radius: 16px;
+  background: rgba(200, 168, 107, 0.07);
+}
+
+.token-help__title {
+  margin: 0 0 10px;
+  font-size: clamp(17px, 4.4vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.token-help__text {
+  margin: 0 0 16px;
+  font-size: clamp(14.5px, 3.8vw, 16px);
+  line-height: 1.75;
+  opacity: 0.88;
+}
+
+.token-help__actions {
+  margin: 0 0 4px;
+}
+
+.token-help__actions .button {
+  min-height: 52px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-color: rgba(200, 168, 107, 0.65);
+  color: var(--accent, #c8a86b);
+}
+
+.token-help__actions .button:hover {
+  background: rgba(200, 168, 107, 0.14);
+}
+
+.token-help__steps {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(200, 168, 107, 0.28);
+}
+
+.token-help__steps > summary {
+  cursor: pointer;
+  font-size: clamp(14.5px, 3.8vw, 16px);
+  font-weight: 600;
+  color: var(--accent, #c8a86b);
+  list-style: none;
+}
+
+.token-help__steps > summary::-webkit-details-marker {
+  display: none;
+}
+
+.token-help__steps > summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.token-help__steps[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.token-steps {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: tk;
+}
+
+.token-steps li {
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: 18px;
+  font-size: clamp(14.5px, 3.8vw, 16px);
+  line-height: 1.8;
+  counter-increment: tk;
+}
+
+.token-steps li::before {
+  content: counter(tk);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(200, 168, 107, 0.2);
+  color: var(--accent, #c8a86b);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.token-steps b {
+  color: #fff;
+  font-weight: 700;
+}
+
+.token-steps code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(10, 11, 13, 0.5);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.92em;
+  color: var(--accent, #c8a86b);
+}
+
+.token-steps__warn {
+  margin: 6px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid #d97757;
+  border-radius: 0 8px 8px 0;
+  background: rgba(217, 119, 87, 0.1);
+  font-size: clamp(13.5px, 3.5vw, 15px);
+  line-height: 1.7;
+}
+
+.token-steps__warn strong {
+  color: #f0a58b;
+}
+
+@media (max-width: 560px) {
+  .token-help__actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================================================
+   连接卡片：深色主题修复
+   ---------------------------------------------------------
+   之前卡片底色是浅米色（#f4f0e9），但文字沿用了全站深色主题的浅色，
+   结果就是「白底白字」—— 站着自己都看不见，还以为字太小。
+   这里把卡片改成深色玻璃质感，文字用浅色，对比度足够。
+   ========================================================= */
+
+.cloud-setup__card {
+  background: #14161b !important;
+  border: 1px solid rgba(200, 168, 107, 0.22) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  color: #ece7de !important;
+}
+
+.cloud-setup__title {
+  color: #f4f1ea !important;
+}
+
+.cloud-setup__lead {
+  color: rgba(236, 231, 222, 0.9) !important;
+}
+
+.cloud-setup__note {
+  background: rgba(200, 168, 107, 0.12) !important;
+  border-left-color: #c8a86b !important;
+  color: rgba(236, 231, 222, 0.88) !important;
+}
+
+.cloud-setup__foot {
+  color: rgba(236, 231, 222, 0.6) !important;
+}
+
+.cloud-setup__foot a {
+  color: #c8a86b !important;
+}
+
+/* 表单字段 */
+.cloud-form .field > span:first-child {
+  color: rgba(236, 231, 222, 0.95) !important;
+}
+
+.cloud-form .field > span:first-child em {
+  color: #d97757 !important;
+  font-style: normal;
+}
+
+.cloud-form .field-hint {
+  color: rgba(236, 231, 222, 0.62) !important;
+  opacity: 1 !important;
+}
+
+#fieldToken {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1.5px solid rgba(200, 168, 107, 0.5) !important;
+  color: #f4f1ea !important;
+  caret-color: #c8a86b;
+}
+
+#fieldToken::placeholder {
+  color: rgba(236, 231, 222, 0.34) !important;
+}
+
+#fieldToken:focus {
+  background: rgba(200, 168, 107, 0.1) !important;
+  border-color: #c8a86b !important;
+}
+
+/* 生成令牌引导块 */
+.token-help {
+  background: rgba(200, 168, 107, 0.1) !important;
+  border-color: rgba(200, 168, 107, 0.42) !important;
+}
+
+.token-help__title {
+  color: #f4f1ea !important;
+}
+
+.token-help__text {
+  color: rgba(236, 231, 222, 0.88) !important;
+  opacity: 1 !important;
+}
+
+.token-help__text strong {
+  color: #c8a86b !important;
+}
+
+.token-help__actions .button {
+  background: rgba(200, 168, 107, 0.16) !important;
+  color: #e8cf9a !important;
+  border-color: rgba(200, 168, 107, 0.7) !important;
+}
+
+.token-help__actions .button:hover {
+  background: rgba(200, 168, 107, 0.26) !important;
+  color: #fff !important;
+}
+
+.token-help__steps > summary {
+  color: #c8a86b !important;
+}
+
+.token-help__steps {
+  border-top-color: rgba(200, 168, 107, 0.3) !important;
+}
+
+.token-steps li {
+  color: rgba(236, 231, 222, 0.9) !important;
+}
+
+.token-steps b {
+  color: #fff !important;
+}
+
+.token-steps code {
+  background: rgba(0, 0, 0, 0.4) !important;
+  color: #e8cf9a !important;
+}
+
+.token-steps__warn {
+  background: rgba(217, 119, 87, 0.16) !important;
+  color: rgba(255, 228, 220, 0.92) !important;
+}
+
+.token-steps__warn strong {
+  color: #ffb59c !important;
+}
+
+/* 高级选项 */
+.cloud-advanced {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(236, 231, 222, 0.18) !important;
+}
+
+.cloud-advanced > summary {
+  color: rgba(236, 231, 222, 0.7) !important;
+}
+
+.cloud-advanced .field > span:first-child {
+  color: rgba(236, 231, 222, 0.8) !important;
+}
+
+.cloud-advanced input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(236, 231, 222, 0.2) !important;
+  color: #f4f1ea !important;
+}
+
+/* 连接按钮：金色实心，最醒目 */
+#cloudConnect {
+  background: linear-gradient(180deg, #d4b478, #b8944f) !important;
+  border-color: #d4b478 !important;
+  color: #14161a !important;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(200, 168, 107, 0.3);
+}
+
+#cloudConnect:hover {
+  background: linear-gradient(180deg, #e0c088, #c8a86b) !important;
+}
+
+/* 次要按钮 */
+#cloudSkip {
+  color: rgba(236, 231, 222, 0.72) !important;
+  border-color: rgba(236, 231, 222, 0.25) !important;
+}
+
+/* 状态文字 */
+#cloudStatus {
+  color: rgba(236, 231, 222, 0.85) !important;
+}
+
+#cloudStatus.is-error {
+  color: #ff9d80 !important;
+}

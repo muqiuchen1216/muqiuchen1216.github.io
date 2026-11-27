@@ -2360,6 +2360,40 @@
     if (repoField) repoField.value = config.repo || '';
     if (branchField) branchField.value = config.branch || 'main';
 
+    /* 生成令牌的链接带上预填参数：GitHub 支持 name / expires_in / 描述，
+       打开后名字和有效期已经填好，用户只要选仓库、勾权限。
+       （GitHub 不允许通过 URL 预选仓库和权限，这两步仍要手点。） */
+    var genLink = document.getElementById('tokenGenerateLink');
+    if (genLink) {
+      var params = [
+        'name=' + encodeURIComponent('muqiuchen-shouji'),
+        'description=' + encodeURIComponent('手机上改作品集'),
+        'expires_in=' + encodeURIComponent('365')
+      ];
+      genLink.href = 'https://github.com/settings/personal-access-tokens/new?' + params.join('&');
+    }
+
+    /* 令牌输入框：聚焦时如果剪贴板里有一串 github_pat_，给个「粘贴」提示。
+       手机上手动长按粘贴挺费劲，这一步能省不少事。 */
+    var tokenInput = document.getElementById('fieldToken');
+    if (tokenInput && navigator.clipboard && navigator.clipboard.readText) {
+      tokenInput.addEventListener('focus', function once() {
+        tokenInput.removeEventListener('focus', once);
+        navigator.clipboard
+          .readText()
+          .then(function (text) {
+            var value = String(text || '').trim();
+            if (/^github_pat_[A-Za-z0-9_]+$/.test(value) && !tokenInput.value) {
+              tokenInput.value = value;
+              setStatus('已经从剪贴板粘好了，点「连接」即可');
+            }
+          })
+          .catch(function () {
+            /* 没有剪贴板权限就算了，用户自己粘 */
+          });
+      });
+    }
+
     function setStatus(text, isError) {
       if (!status) return;
       status.textContent = text || '';
