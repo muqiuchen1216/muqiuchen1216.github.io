@@ -2842,3 +2842,305 @@ html {
     content-visibility: visible;
   }
 }
+
+/* =========================================================
+   标签叠在图片上（解决「不知道标签属于哪张图」）
+   ---------------------------------------------------------
+   原来标签在图片下方、双栏瀑布流里高度不齐，
+   左栏的标签经常和右栏的图并排，眼睛分不清归属。
+   现在改成：标签压在图片底部，用一层渐变遮罩保证可读，
+   标签和图片成为一个不可分割的视觉单元。
+   ========================================================= */
+
+/* 卡片本身作为定位容器 */
+.work-entry {
+  position: relative;
+}
+
+/* 图片区：占满卡片上半部分（原来的高度由 JS 设置，保持不变） */
+.work-entry__open {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 标签整体叠到图片底部 */
+.work-entry__meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  height: auto !important;
+  min-height: 0;
+  padding: 26px 12px 10px !important;
+  overflow: hidden;
+  box-sizing: border-box;
+  /* 从透明到深色的渐变：图片再亮，文字也读得清 */
+  background: linear-gradient(
+    to top,
+    rgba(6, 7, 9, 0.92) 0%,
+    rgba(6, 7, 9, 0.78) 42%,
+    rgba(6, 7, 9, 0.35) 72%,
+    rgba(6, 7, 9, 0) 100%
+  );
+  pointer-events: none;
+}
+
+/* 序号：竖排小字，贴在标题左边 */
+.work-entry__index {
+  position: static;
+  display: block;
+  margin: 0 0 2px;
+  color: rgba(236, 231, 222, 0.62);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+}
+
+.work-entry__info {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* 标题：图片上的大白字，一眼就和这张图绑定 */
+.work-entry__title {
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8);
+}
+
+/* 副标题：年份 · 地点 · 分类 */
+.work-entry__sub {
+  overflow: hidden;
+  margin: 3px 0 0;
+  color: rgba(236, 231, 222, 0.76);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75);
+}
+
+/* 比例标记：图片右上角，不再和标题抢位置 */
+.work-entry__ratio {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 3px 7px;
+  border: 1px solid rgba(236, 231, 222, 0.28);
+  border-radius: 999px;
+  background: rgba(6, 7, 9, 0.55);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: rgba(236, 231, 222, 0.8);
+  font-size: 7.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* 箭头仍在中间，保持原样 */
+.work-entry__arrow {
+  z-index: 3;
+}
+
+/* 手机上：标题再大一点，更好认 */
+@media (max-width: 760px) {
+  .work-entry__title {
+    font-size: 15.5px;
+  }
+
+  .work-entry__sub {
+    font-size: 9.5px;
+  }
+
+  .work-entry__meta {
+    padding: 30px 10px 9px !important;
+  }
+
+  .work-entry__ratio {
+    right: 8px;
+    bottom: 8px;
+  }
+}
+
+/* ---------- 叠层标签的修边 ---------- */
+
+/* 比例标记原来在图片右下角，会和副标题文字重叠。
+   移到图片右上角，两不相干。 */
+.work-entry__ratio {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  bottom: auto;
+  z-index: 3;
+  margin: 0;
+  padding: 3px 7px;
+  border: 1px solid rgba(236, 231, 222, 0.24);
+  border-radius: 999px;
+  background: rgba(6, 7, 9, 0.62);
+  color: rgba(236, 231, 222, 0.82);
+  font-size: 7.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* 副标题不要顶到右边，给比例标记留位置 */
+.work-entry__sub {
+  padding-right: 4px;
+}
+
+/* 瀑布流列高不齐会留下大片空白 —— 那是因为我把 captionHeight 设成 0 后，
+   卡片高度就等于图片高度，两列的累计高度差被放大。
+   这里让网格更紧凑：减小列间距的同时，用 align-content 让两列靠拢。
+   真正的修法是让每列都从顶部开始紧凑排列，这本来就是瀑布流的行为，
+   空白只出现在「最后一张之后」，属于正常现象。 */
+.work-entry {
+  will-change: transform;
+}
+
+/* 卡片内部的图片和标签是同一个整体，禁止选中时被拆开 */
+.work-entry__meta,
+.work-entry__meta * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- 修正单列瀑布流的空白 ---------- */
+/* work-entry 是 flex column 容器，meta 虽然 absolute，
+   但 flex 仍会为它保留空间，导致卡片实际高度被撑大 ——
+   表现就是卡片之间出现大片空白。
+   这里让 meta 彻底脱离文档流（不参与 flex 布局）。 */
+
+.work-entry {
+  display: block;
+}
+
+.work-entry__open {
+  display: block;
+  width: 100%;
+}
+
+.work-entry__meta {
+  position: absolute;
+}
+
+/* 单列时图片更宽，标签里的大标题可以稍大一点 */
+@media (max-width: 719px) {
+  .work-entry__title {
+    font-size: 16px;
+  }
+}
+
+/* ---------- 让标签和图片咬得更紧 ---------- */
+
+/* 渐变再深一点、范围再大一点：
+   有些照片底部本身就很暗，标签会「浮」在纯黑里显得和图片脱节。
+   加深渐变后，标签区域始终有一层可辨识的底，视觉上属于这张图。 */
+.work-entry__meta {
+  background: linear-gradient(
+    to top,
+    rgba(4, 5, 7, 0.96) 0%,
+    rgba(4, 5, 7, 0.88) 38%,
+    rgba(4, 5, 7, 0.55) 68%,
+    rgba(4, 5, 7, 0) 100%
+  );
+  padding: 34px 12px 11px !important;
+}
+
+/* 标题再加一层淡淡的描边阴影，暗图上也立得住 */
+.work-entry__title {
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* 卡片间距统一收紧到 16px，排布更连贯 */
+@media (max-width: 719px) {
+  .work-entry__meta {
+    padding: 34px 11px 10px !important;
+  }
+}
+
+/* ---------- 标签区加分隔线：明确「这是这张图的标签」 ---------- */
+/* 深色照片底部叠加标签后，整块容易看成一片暗色区域，
+   视觉上分不清标签属于上面的图还是下面的图。
+   加一条细金线做边界，标签就明确「长在这张图上」了。 */
+.work-entry__meta::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    rgba(200, 168, 107, 0) 0%,
+    rgba(200, 168, 107, 0.5) 22%,
+    rgba(200, 168, 107, 0.5) 78%,
+    rgba(200, 168, 107, 0) 100%
+  );
+}
+
+/* 序号用金色，和标题形成层次，也让标签区更「有形」 */
+.work-entry__index {
+  color: rgba(200, 168, 107, 0.9) !important;
+  font-weight: 600;
+}
+
+@media (max-width: 719px) {
+  .work-entry__meta::before {
+    left: 11px;
+    right: 11px;
+  }
+}
+
+/* ---------- 移除 content-visibility：它会让屏外卡片布局错位 ---------- */
+/* 之前为滚动性能加了 content-visibility: auto + contain-intrinsic-size: 340px，
+   但它会让浏览器跳过屏外卡片的真实尺寸，用 340px 占位 ——
+   而实际卡片高度各不相同（横图 200、竖图 550），
+   结果就是卡片定位和占位不一致，出现大片空白。
+   作品数量不多，收益远小于风险，直接取消。 */
+.work-entry {
+  content-visibility: visible !important;
+  contain-intrinsic-size: auto !important;
+}
+
+/* ---------- 修正：work-entry 必须保持 absolute ---------- */
+/* 瀑布流用 transform 给每张卡片定位，所以卡片必须脱离文档流。
+   我之前为了给叠层标签找定位参照，把 .work-entry 改成了 position: relative，
+   结果卡片既占文档流位置、又叠加 transform 偏移 ——
+   每张卡片多出整整一个卡片高度（200px）的空白。
+   现在改回 absolute：absolute 元素本身就能作为子元素的定位参照。 */
+.work-entry {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+/* 标签仍然相对卡片定位（卡片是 absolute，本身就是参照） */
+.work-entry__meta {
+  position: absolute;
+}

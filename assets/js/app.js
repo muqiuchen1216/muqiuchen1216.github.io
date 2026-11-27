@@ -1096,15 +1096,15 @@
     var width = els.gallery.clientWidth;
     if (!width) return;
 
-    var columns = width < 320 ? 1 : 2;
+    /* 手机上用单列。
+       以前窄屏也强制两列：每列只有 175px，横图缩成小条、
+       竖图却高达 270px，两列累高差被放大，中间留出大片空白，
+       标签也挤在一起看不清。单列图大、标签清楚、瀑布流也不会空。 */
+    var columns = width < 720 ? 1 : 2;
     var columnGap = width >= 1100 ? 28 : width >= 640 ? 16 : 8;
-    var verticalGap = width >= 640 ? 38 : 20;
-    /* 手机上也要显示标题。
-       以前这里是 `width < 640 ? 0`，标题高度算成 0，
-       再配合 CSS 的 .is-compact 把整块说明藏掉 ——
-       结果就是手机上只剩图片，没有任何作品名（站长自己都找不到）。
-       现在窄屏给一个紧凑高度，标题压缩成一行小字，但始终可见。 */
-    var captionHeight = width >= 980 ? 66 : width >= 640 ? 64 : 46;
+    var verticalGap = width >= 640 ? 38 : 16;
+    /* 标签叠在图片底部，不再占额外高度。 */
+    var captionHeight = 0;
     var columnWidth = (width - columnGap * (columns - 1)) / columns;
     var heights = [];
     var i;
@@ -1138,8 +1138,20 @@
 
     els.gallery.style.setProperty('--caption-h', captionHeight + 'px');
     // 说明栏的显示与否交给同一个判断，避免 CSS 断点与画廊宽度错开。
-    els.gallery.classList.toggle('is-compact', captionHeight === 0);
-    els.gallery.style.height = Math.max(0, Math.max.apply(null, heights) - verticalGap).toFixed(3) + 'px';
+    /* 标签已叠在图片上，不再有「说明栏」这个概念，
+       所以永远不加 is-compact（加了会让 CSS 走紧凑分支，和叠层样式打架）。 */
+    els.gallery.classList.remove('is-compact');
+    /* 容器高度按「卡片实际占用的最大底边」算，不再用 heights 数组：
+       heights 是每列的累加值，单列/多列切换时容易算错；
+       直接量每张卡片的 transform.y + 自身高度，永远和实际一致。 */
+    var maxBottom = 0;
+    cards.forEach(function (card) {
+      var h = parseFloat(card.style.height) || 0;
+      var m = /translate3d\([^,]+,\s*(-?[0-9.]+)px/.exec(card.style.transform || '');
+      var y = m ? parseFloat(m[1]) : 0;
+      if (y + h > maxBottom) maxBottom = y + h;
+    });
+    els.gallery.style.height = (maxBottom > 0 ? maxBottom : 0).toFixed(3) + 'px';
     state.lastWidth = width;
   }
 

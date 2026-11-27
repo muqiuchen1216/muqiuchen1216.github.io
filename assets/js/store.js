@@ -225,9 +225,12 @@
   /* 云端模式的「实时」：没有长连接可挂，改成按需轮询。
      - 页面在前台时才查，切到后台自动停（省流量、省接口次数）；
      - 刚自己写完的一小段时间内不查，免得把自己的改动当成别人的。
-     GitHub 未知令牌的限额是每小时 60 次，所以间隔不能太小。 */
-  var CLOUD_POLL_MS = 25000;
-  var CLOUD_WRITE_QUIET_MS = 8000;
+       GitHub 令牌的限额实测是每小时 5000 次，够用。 */
+  /* 轮询间隔。原来 25 秒，感觉「改了但网站没变」；
+     实测这个账号每小时限额 5000 次，8 秒一次跑一小时才 450 次，
+     完全够用。页面在后台时不查，也不浪费。 */
+  var CLOUD_POLL_MS = 8000;
+  var CLOUD_WRITE_QUIET_MS = 3000;
 
   function ensureCloudChannel() {
     if (!isCloud()) return;
