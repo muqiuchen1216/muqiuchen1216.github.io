@@ -14,8 +14,10 @@
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/studio.css">
   <script defer src="assets/js/data.js"></script>
+  <script defer src="assets/js/cloud.js"></script>
   <script defer src="assets/js/store.js"></script>
   <script defer src="assets/js/studio.js"></script>
+  <script defer src="assets/js/install.js"></script>
 </head>
 <body class="studio-page">
   <a class="skip-link" href="#studioMain">跳到主要内容</a>
@@ -29,6 +31,12 @@
       <div class="studio-header__actions">
         <span class="sync-mode" id="syncMode" data-state="wait">连接中</span>
         <span class="save-indicator" id="saveIndicator" role="status" aria-live="polite"></span>
+        <button class="button button--ghost button--small" type="button" id="installApp" hidden>
+          装到主屏
+        </button>
+        <button class="button button--ghost button--small" type="button" id="cloudToolbar" hidden title="云端与清理">
+          云端
+        </button>
         <a class="button button--ghost button--small" href="index.html" target="_blank" rel="noopener">
           查看网站
           <svg class="icon icon--12" viewBox="0 0 24 24" aria-hidden="true">
@@ -70,6 +78,65 @@
   </section>
 
   <main class="studio-main" id="studioMain" tabindex="-1">
+    <section class="cloud-setup" id="cloudSetup" hidden aria-labelledby="cloudSetupTitle">
+      <div class="cloud-setup__card">
+        <p class="eyebrow">
+          <span class="eyebrow__dot" aria-hidden="true"></span>
+          <span>Cloud / 手机编辑</span>
+        </p>
+        <h1 class="cloud-setup__title" id="cloudSetupTitle">把这台设备<br>连上你的网站</h1>
+        <p class="cloud-setup__lead">
+          连上以后，你在手机上直接就能改图和改文字，<strong>不用再开电脑、不用开服务器</strong>。
+          改完约半分钟，网站自动变成新的。
+        </p>
+        <p class="cloud-setup__note">
+          只需要做一次。钥匙（令牌）只存在这台设备的浏览器里，不会上传到任何地方；
+          别人没有这把钥匙，所以只能看，不能改。
+        </p>
+
+        <form class="cloud-form" id="cloudForm">
+          <label class="field">
+            <span>GitHub 令牌 <em>必填</em></span>
+            <input type="password" id="fieldToken" autocomplete="off" spellcheck="false"
+                   placeholder="ghp_ 或 github_pat_ 开头的一长串">
+            <span class="field-hint">
+              在 GitHub 网页上生成：Settings → Developer settings → Personal access tokens →
+              Fine-grained tokens → 新建，权限只勾 <strong>Contents: Read and write</strong>，
+              仓库只选 <strong>muqiuchen1216.github.io</strong>。
+            </span>
+          </label>
+
+          <details class="cloud-advanced">
+            <summary>仓库设置（一般不用改）</summary>
+            <div class="field-grid">
+              <label class="field">
+                <span>用户名</span>
+                <input type="text" id="fieldOwner" autocomplete="off" spellcheck="false" placeholder="muqiuchen1216">
+              </label>
+              <label class="field">
+                <span>仓库名</span>
+                <input type="text" id="fieldRepo" autocomplete="off" spellcheck="false" placeholder="muqiuchen1216.github.io">
+              </label>
+            </div>
+            <label class="field">
+              <span>分支</span>
+              <input type="text" id="fieldBranch" autocomplete="off" spellcheck="false" placeholder="main">
+            </label>
+          </details>
+
+          <div class="form-actions">
+            <button class="button" type="submit" id="cloudConnect">连接</button>
+            <button class="button button--ghost button--small" type="button" id="cloudSkip">先只看看</button>
+            <span class="form-status" id="cloudStatus" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+
+        <p class="cloud-setup__foot">
+          只想浏览作品？<a href="index.html">回首页</a>。已经连过的设备会直接进工作室，看不到这一页。
+        </p>
+      </div>
+    </section>
+
     <section class="studio-intro" aria-labelledby="studioTitle">
       <p class="eyebrow">
         <span class="eyebrow__dot" aria-hidden="true"></span>
@@ -88,6 +155,19 @@
       <p class="sync-banner__text" id="syncBannerText"></p>
       <button class="button button--small" type="button" id="syncBannerAction" hidden>同步到网站</button>
     </div>
+
+    <section class="cloud-panel" id="cloudPanel" hidden aria-labelledby="cloudPanelTitle">
+      <div class="cloud-panel__inner">
+        <h2 id="cloudPanelTitle">云端设置</h2>
+        <p class="cloud-panel__lead" id="cloudPanelInfo"></p>
+        <div class="cloud-panel__actions">
+          <button class="button button--small" type="button" id="cloudCleanOrphans">清理没用的图片</button>
+          <button class="button button--ghost button--small" type="button" id="cloudForget">断开这台设备</button>
+          <button class="button button--ghost button--small" type="button" id="cloudPanelClose">关闭</button>
+        </div>
+        <p class="cloud-panel__note" id="cloudPanelNote"></p>
+      </div>
+    </section>
 
     <section class="studio-locked" id="studioLocked" hidden aria-labelledby="studioLockedTitle">
       <p class="studio-locked__tag">线上公开版本 · 只读</p>

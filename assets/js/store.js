@@ -62,8 +62,15 @@
   var profileDbPromise = null;
   var channel = null;
 
+  /* 云端写入层（assets/js/cloud.js）。没加载时降级为纯静态只读。 */
+  var Cloud = window.PortfolioCloud || null;
+
   /* ---------- 状态 ---------- */
-  var mode = 'local'; // 'local' | 'server' | 'static'
+  var mode = 'local'; // 'local' | 'server' | 'static' | 'cloud'
+  /* cloud 模式：有令牌，可以直接读写 GitHub 仓库；访客没有令牌，是只读的 static。 */
+  function isCloud() {
+    return mode === 'cloud';
+  }
   var siteSnapshot = null;
   var publishedProfile = null;
   var publishedWorks = null;
@@ -152,6 +159,10 @@
   }
 
   function ensureLiveChannel() {
+    if (mode === 'cloud') {
+      ensureCloudChannel();
+      return;
+    }
     if (mode !== 'server') {
       setLiveState('local');
       return;
@@ -206,6 +217,42 @@
         }
       );
     }, 5000);
+  }
+
+  /* 云端模式的「实时」：没有长连接可挂，改成按需轮询。
+     - 页面在前台时才查，切到后台自动停（省流量、省接口次数）；
+     - 刚自己写完的一小段时间内不查，免得把自己的改动当成别人的。
+     GitHub 未知令牌的限额是每小时 60 次，所以间隔不能太小。 */
+  var CLOUD_POLL_MS = 25000;
+  var CLOUD_WRITE_QUIET_MS = 8000;
+
+  function ensureCloudChannel() {
+    if (!isCloud()) return;
+    if (livePollTimer) return;
+    setLiveState('connected');
+
+    var poll = function () {
+      if (document.visibilityState === 'hidden') return;
+      if (Cloud && Cloud.getLastWriteAt && Date.now() - Cloud.getLastWriteAt() < CLOUD_WRITE_QUIET_MS) {
+        return;
+      }
+      fetchSite().then(
+        function (payload) {
+          setLiveState('connected');
+          var revision = typeof payload.revision === 'number' ? payload.revision : 0;
+          if (revision <= lastRevision) return;
+          emit({ type: 'site', revision: revision });
+        },
+        function () {
+          setLiveState('offline');
+        }
+      );
+    };
+
+    livePollTimer = window.setInterval(poll, CLOUD_POLL_MS);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') poll();
+    });
   }
 
   /* ---------- 服务器接口 ---------- */
@@ -297,6 +344,8 @@
 
   function accessSnapshot() {
     if (mode === 'static') return { canEdit: false, checked: true, unlock: null, reason: 'static' };
+    // 云端模式：有令牌就是这张「后台」，没令牌已经落到 static 了。
+    if (mode === 'cloud') return { canEdit: true, checked: true, unlock: null, reason: 'cloud' };
     if (mode !== 'server') return { canEdit: true, checked: true, unlock: null, reason: 'local' };
     return {
       canEdit: accessState.canEdit,
@@ -308,6 +357,7 @@
 
   function getAccess(force) {
     return readyPromise.then(function () {
+      if (mode === 'cloud') return accessSnapshot();
       if (mode !== 'server') return accessSnapshot();
       if (accessState.checked && !force) return accessSnapshot();
       return fetchSite().then(accessSnapshot, function (error) {
@@ -375,6 +425,22 @@
     if (typeof window.fetch !== 'function' || !/^https?:$/.test(window.location.protocol)) {
       return Promise.resolve('local');
     }
+    /* 先看这台设备有没有配好令牌：有就直接进 cloud 模式（可读写）。
+       没有令牌就按以前的逻辑走：本机服务器 → 线上静态数据。 */
+    if (Cloud && Cloud.canWrite && Cloud.canWrite()) {
+      return Cloud.readSite().then(
+        function (result) {
+          // 读得到就先渲染出来；仓库里暂时没数据也进 cloud，
+          // 第一次保存时 mutateSite 会自己建出这份文件。
+          if (result && result.site) adoptSite(result.site);
+          return 'cloud';
+        },
+        function () {
+          // 令牌无效或网络不通时退回只读，至少网站能正常浏览。
+          return 'static';
+        }
+      );
+    }
     return apiRequest('/site', { method: 'GET' }, 4000).then(
       function (payload) {
         adoptSite(payload);
@@ -389,6 +455,13 @@
   }
 
   function fetchSite() {
+    if (isCloud()) {
+      return Cloud.readSite().then(function (result) {
+        if (!result || !result.site) return { works: [], profile: {}, revision: 0 };
+        adoptSite(result.site);
+        return result.site;
+      });
+    }
     return apiRequest('/site', { method: 'GET' }, 10000).then(function (payload) {
       adoptSite(payload);
       return payload;
@@ -399,6 +472,201 @@
     return fetchSite().then(function (payload) {
       var works = Array.isArray(payload.works) ? payload.works : [];
       return works.map(remoteWork);
+    });
+  }
+
+  /* ---------- 云端写入（GitHub） ---------- */
+
+  /* 把作品数组按 order 排好，和服务器端的 sortStoreWorks 保持一致。 */
+  function sortWorks(list) {
+    return list.sort(function (left, right) {
+      var a = Number.isFinite(left.order) ? left.order : 0;
+      var b = Number.isFinite(right.order) ? right.order : 0;
+      if (a !== b) return a - b;
+      var ac = Number(left.createdAt) || 0;
+      var bc = Number(right.createdAt) || 0;
+      return ac - bc;
+    });
+  }
+
+  function workspaceMediaPath(url) {
+    var match = String(url || '').match(/^\/?(media\/[A-Za-z0-9][A-Za-z0-9._-]*)$/);
+    return match ? match[1] : '';
+  }
+
+  /* 云端模式上传作品。
+     为「手机上等着看效果」做的取舍：
+     1) 显示图和缩略图并发传（少等一趟）；
+     2) 只要显示图，缩略图传失败也不影响作品上线 —— 首页会用显示图兜底，
+        手机上先看到图，比「完美但慢」重要。 */
+  function addWorkCloud(record) {
+    var source = record || {};
+    var id = source.id || randomId();
+    var displayBlob = source.displayBlob instanceof Blob ? source.displayBlob : null;
+    var thumbBlob = source.thumbBlob instanceof Blob ? source.thumbBlob : null;
+
+    var payload = Object.assign({}, source, { id: id });
+    delete payload.displayBlob;
+    delete payload.thumbBlob;
+    delete payload.displayType;
+    delete payload.thumbType;
+    delete payload.remote;
+
+    var displayPromise = displayBlob
+      ? Cloud.uploadMedia(id, 'display', displayBlob, extensionFor(displayBlob.type))
+      : Promise.resolve(source.displayUrl || '');
+
+    /* 缩略图失败就把这条 Promise 变成「空」，不要让整次上传失败：
+       首页在没有缩略图时会退回用显示图，看起来没区别，只是多下一点流量。 */
+    var thumbPromise =
+      thumbBlob && thumbBlob !== displayBlob
+        ? Cloud.uploadMedia(id, 'thumb', thumbBlob, extensionFor(thumbBlob.type)).then(
+            function (url) {
+              return url;
+            },
+            function () {
+              return '';
+            }
+          )
+        : Promise.resolve('');
+
+    return Promise.all([displayPromise, thumbPromise]).then(function (urls) {
+      var displayUrl = urls[0] || '';
+      var thumbUrl = urls[1] || displayUrl;
+      payload.displayUrl = displayUrl;
+      payload.thumbUrl = thumbUrl;
+      return Cloud.mutateSite(function (site) {
+        var existing = site.works.findIndex(function (work) {
+          return work.id === id;
+        });
+        if (existing === -1) {
+          payload.updatedAt = Date.now();
+          if (!Number.isFinite(payload.createdAt)) payload.createdAt = Date.now();
+          site.works.push(payload);
+        } else {
+          payload.createdAt = site.works[existing].createdAt;
+          payload.updatedAt = Date.now();
+          site.works[existing] = payload;
+        }
+        sortWorks(site.works);
+      }, '新增作品：' + (payload.title || id));
+    }).then(function (site) {
+      if (site && typeof site.revision === 'number') lastRevision = Math.max(lastRevision, site.revision);
+      siteSnapshot = null;
+      publishedWorks = null;
+      return remoteWork(payload);
+    });
+  }
+
+  function extensionFor(type) {
+    var value = String(type || '').toLowerCase();
+    if (value.indexOf('png') !== -1) return '.png';
+    if (value.indexOf('avif') !== -1) return '.avif';
+    if (value.indexOf('gif') !== -1) return '.gif';
+    if (value.indexOf('jpeg') !== -1 || value.indexOf('jpg') !== -1) return '.jpg';
+    return '.webp';
+  }
+
+  function updateWorkCloud(id, patch) {
+    return Cloud.mutateSite(function (site) {
+      var work = site.works.find(function (item) {
+        return item.id === id;
+      });
+      if (!work) throw new Error('这件作品在线上已经不存在了');
+      var keys = Object.keys(patch || {});
+      keys.forEach(function (key) {
+        if (key === 'displayBlob' || key === 'thumbBlob') return;
+        work[key] = patch[key];
+      });
+      work.updatedAt = Date.now();
+    }, '修改作品 ' + id).then(function (site) {
+      if (site && typeof site.revision === 'number') lastRevision = Math.max(lastRevision, site.revision);
+      siteSnapshot = null;
+      publishedWorks = null;
+      var found = site.works.find(function (work) {
+        return work.id === id;
+      });
+      return remoteWork(found || { id: id });
+    });
+  }
+
+  function deleteWorkCloud(id) {
+    return Cloud.mutateSite(function (site) {
+      site.works = site.works.filter(function (work) {
+        return work.id !== id;
+      });
+    }, '删除作品 ' + id).then(function (site) {
+      if (site && typeof site.revision === 'number') lastRevision = Math.max(lastRevision, site.revision);
+      siteSnapshot = null;
+      publishedWorks = null;
+      /* 数据写完之后再清图片，而且必须等它真的做完。
+         之前这里没返回这个 Promise，删除动作「看起来」立刻结束，
+         紧随其后的下一次上传可能和清理同时进行，导致扫到一半就结束、留下残图。 */
+      if (Cloud.purgeMediaForWork) {
+        return Cloud.purgeMediaForWork(id, []).then(
+          function () {
+            return true;
+          },
+          function () {
+            return true;
+          }
+        );
+      }
+      return true;
+    });
+  }
+
+  function reorderWorksCloud(ids) {
+    return Cloud.mutateSite(function (site) {
+      var positions = {};
+      (ids || []).forEach(function (id, index) {
+        if (typeof id === 'string') positions[id] = index;
+      });
+      site.works.forEach(function (work) {
+        if (Object.prototype.hasOwnProperty.call(positions, work.id)) work.order = positions[work.id];
+      });
+      sortWorks(site.works);
+    }, '调整作品顺序').then(function (site) {
+      if (site && typeof site.revision === 'number') lastRevision = Math.max(lastRevision, site.revision);
+      siteSnapshot = null;
+      publishedWorks = null;
+      return true;
+    });
+  }
+
+  function saveProfileCloud(clean, updatedAt) {
+    var avatarBlob = /^data:image\//i.test(clean.avatar) ? dataUrlToBlob(clean.avatar) : null;
+    var prepared = avatarBlob
+      ? Cloud.uploadMedia('avatar', 'image', avatarBlob, extensionFor(avatarBlob.type)).then(
+          function (saved) {
+            return saved || '';
+          },
+          function () {
+            return clean.avatar;
+          }
+        )
+      : Promise.resolve(clean.avatar || '');
+
+    return prepared.then(function (avatar) {
+      var payload = Object.assign({}, clean, { avatar: avatar || '' });
+      return Cloud.mutateSite(function (site) {
+        site.profile = payload;
+      }, '更新个人资料').then(function (site) {
+        if (site && typeof site.revision === 'number') lastRevision = Math.max(lastRevision, site.revision);
+        siteSnapshot = null;
+        publishedProfile = null;
+        var saved = sanitizeProfile(Object.assign({}, DEFAULT_PROFILE, site.profile || {}));
+        cacheProfileLocally(saved, updatedAt);
+        return saved;
+      });
+    });
+  }
+
+  function uploadAvatarCloud(blob) {
+    if (!(blob instanceof Blob)) return Promise.reject(new Error('没有可上传的头像文件'));
+    return Cloud.uploadMedia('avatar', 'image', blob, extensionFor(blob.type)).then(function (url) {
+      lastRevision += 0;
+      return url;
     });
   }
 
@@ -1416,7 +1684,7 @@
 
   function getAllWorks() {
     return readyPromise.then(function () {
-      if (mode === 'server') return fetchWorks();
+      if (mode === 'server' || mode === 'cloud') return fetchWorks();
       if (mode === 'static') return publishedWorks ? publishedWorks.slice() : [];
       return getAllWorksLocal();
     });
@@ -1425,6 +1693,7 @@
   function addWork(record) {
     return readyPromise.then(function () {
       if (mode === 'server') return addWorkRemote(record);
+      if (mode === 'cloud') return addWorkCloud(record);
       if (mode === 'static') throw new Error(READ_ONLY_MESSAGE);
       return addWorkLocal(record);
     });
@@ -1433,6 +1702,7 @@
   function updateWork(id, patch) {
     return readyPromise.then(function () {
       if (mode === 'server') return updateWorkRemote(id, patch);
+      if (mode === 'cloud') return updateWorkCloud(id, patch);
       if (mode === 'static') throw new Error(READ_ONLY_MESSAGE);
       return updateWorkLocal(id, patch);
     });
@@ -1441,6 +1711,7 @@
   function deleteWork(id) {
     return readyPromise.then(function () {
       if (mode === 'server') return deleteWorkRemote(id);
+      if (mode === 'cloud') return deleteWorkCloud(id);
       if (mode === 'static') throw new Error(READ_ONLY_MESSAGE);
       return deleteWorkLocal(id);
     });
@@ -1449,6 +1720,7 @@
   function reorderWorks(ids) {
     return readyPromise.then(function () {
       if (mode === 'server') return reorderWorksRemote(ids);
+      if (mode === 'cloud') return reorderWorksCloud(ids);
       if (mode === 'static') throw new Error(READ_ONLY_MESSAGE);
       return reorderWorksLocal(ids);
     });
@@ -1457,7 +1729,7 @@
   function getProfileAsync() {
     return readyPromise.then(function () {
       if (mode === 'static') return publishedProfile || getProfile();
-      if (mode !== 'server') return getProfileAsyncLocal();
+      if (mode !== 'server' && mode !== 'cloud') return getProfileAsyncLocal();
       return fetchSite().then(
         function (payload) {
           var merged = sanitizeProfile(Object.assign({}, DEFAULT_PROFILE, payload.profile || {}));
@@ -1475,15 +1747,17 @@
     var clean = sanitizeProfile(profile);
     return readyPromise.then(function () {
       if (mode === 'static') throw new Error(READ_ONLY_MESSAGE);
+      if (mode === 'cloud') return saveProfileCloud(clean, Date.now());
       if (mode === 'server') return saveProfileRemote(clean, Date.now());
       return saveProfileLocal(clean);
     });
   }
 
-  /* 服务器模式下把头像单独上传成 media 文件，避免把 base64 塞进数据文件。
-     本地模式返回空字符串，由工作室自己转成 data URL。 */
+  /* 服务器模式与云端模式都把握把图单独上传成 media 文件，
+     避免把 base64 塞进数据文件。本地模式返回空字符串，由工作室转成 data URL。 */
   function uploadAvatar(blob) {
     return readyPromise.then(function () {
+      if (mode === 'cloud') return uploadAvatarCloud(blob);
       if (mode !== 'server') return '';
       return uploadAvatarRemote(blob);
     });
@@ -1570,7 +1844,7 @@
   detectMode().then(function (result) {
     mode = result;
     readyResolve({ mode: mode });
-    if (mode === 'server') ensureLiveChannel();
+    if (mode === 'server' || mode === 'cloud') ensureLiveChannel();
     else if (mode === 'static') setLiveState('static');
     else setLiveState('local');
   });
@@ -1579,6 +1853,7 @@
     defaultProfile: DEFAULT_PROFILE,
     ready: readyPromise,
     getMode: getMode,
+    isCloud: isCloud,
     isReadOnly: isReadOnly,
     readOnlyMessage: READ_ONLY_MESSAGE,
     getLiveState: getLiveState,

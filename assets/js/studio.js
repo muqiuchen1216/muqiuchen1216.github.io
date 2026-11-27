@@ -132,9 +132,21 @@
     return Boolean(Store && typeof Store.getMode === 'function' && Store.getMode() === 'server');
   }
 
-  /* 线上公开版本（Vercel / GitHub Pages）：只有静态文件，页面只读。 */
+  /* 云端模式：连着 GitHub，可以改，改动会直接提交到仓库。 */
+  function isCloudMode() {
+    return Boolean(Store && typeof Store.isCloud === 'function' && Store.isCloud());
+  }
+
+  /* 线上公开版本（Vercel / GitHub Pages）且没有令牌：只有静态文件，页面只读。
+     —— 云端模式虽然也是从线上打开，但要能编辑，所以必须排除掉。 */
   function isOnlineMode() {
+    if (isCloudMode()) return false;
     return Boolean(Store && typeof Store.getMode === 'function' && Store.getMode() === 'static');
+  }
+
+  /* 能编辑的两种模式（本机服务器 / 云端）。 */
+  function canUploadHere() {
+    return isServerMode() || isCloudMode();
   }
 
   function syncTargetLabel(serverText, localText) {
@@ -382,7 +394,7 @@
         canvas = buildAvatarCanvas(image);
         var dataUrl = canvas.toDataURL('image/jpeg', 0.86);
 
-        if (!isServerMode()) {
+        if (!canUploadHere()) {
           releaseAvatarCanvas(canvas);
           canvas = null;
           useLocalDataUrl(dataUrl);
@@ -531,6 +543,12 @@
       return;
     }
 
+    if (isCloudMode()) {
+      els.storageUsage.textContent =
+        '作品直接存到你的 GitHub 仓库（media/ 目录），电脑不用开机。请保留原始照片备份。';
+      return;
+    }
+
     if (isServerMode()) {
       els.storageUsage.textContent =
         '作品保存在这台电脑的 media/ 目录里，同一局域网的所有设备都会看到同一份内容。请保留原始照片备份。';
@@ -665,6 +683,14 @@
         text = '正在连接';
         name = 'wait';
       }
+    } else if (mode === 'cloud') {
+      if (live === 'offline') {
+        text = '网络断开';
+        name = 'off';
+      } else {
+        text = '云端同步中';
+        name = 'on';
+      }
     } else if (mode === 'static') {
       text = '线上浏览模式';
       name = 'static';
@@ -675,9 +701,11 @@
     els.syncMode.title =
       mode === 'server'
         ? '改动会立即保存到这台电脑，并推送给所有打开的页面'
-        : mode === 'static'
-          ? '这是发布在互联网上的公开版本，内容只读'
-          : '本地模式：改动只在这个浏览器里';
+        : mode === 'cloud'
+          ? '改动会直接存到 GitHub，约半分钟后网站自动更新；电脑不用开机'
+          : mode === 'static'
+            ? '这是发布在互联网上的公开版本，内容只读'
+            : '本地模式：改动只在这个浏览器里';
   }
 
   function showSyncBanner(text, action) {
@@ -761,7 +789,7 @@
       return;
     }
 
-    if (!isServerMode()) {
+    if (!canUploadHere()) {
       showSyncBanner(
         '当前是本地模式：改动只保存在这个浏览器里，手机和其它设备看不到。用项目目录里的「启动网站.cmd」打开网址，就会自动变成实时同步。'
       );
@@ -1977,7 +2005,7 @@
     }
 
     // 本地模式下尽量让浏览器把作品数据标记为持久化存储，避免被自动清理。
-    if (!isServerMode() && Store.requestPersistence) {
+    if (!canUploadHere() && Store.requestPersistence) {
       Store.requestPersistence().catch(function () {
         /* noop */
       });
@@ -1992,58 +2020,65 @@
       }, -1) + 1;
     var total = files.length;
     var stoppedForQuota = false;
-    var verb = isServerMode() ? '正在上传 ' : '正在处理 ';
+    var verb = canUploadHere() ? '正在上传 ' : '正在处理 ';
+    var cloud = isCloudMode();
+    /* 云端模式一次并发传 3 张：每张要经历「压缩 → 传图 → 写数据」，
+       串行传 5 张要等半分钟；并发 3 路能把总时间压到 1/3 左右。
+       不并发更多是因为手机上传带宽有限，再多反而互相抢。 */
+    var CONCURRENCY = cloud ? 3 : 1;
 
     updateProgress(0, total, '准备上传…');
 
-    try {
-      for (var index = 0; index < files.length; index += 1) {
-        var file = files[index];
-        updateProgress(index, total, verb + (index + 1) + ' / ' + total + '：' + file.name);
-
-        try {
-          var derivatives = await Store.createDerivatives(file);
-          var record = {
-            id: Store.randomId(),
-            title: Store.titleFromFilename(file.name),
-            en: '',
-            year: String(new Date().getFullYear()),
-            location: state.profile ? state.profile.location : '',
-            category: '',
-            composition: '',
-            caption: '',
-            width: derivatives.width,
-            height: derivatives.height,
-            displayBlob: derivatives.displayBlob,
-            thumbBlob: derivatives.thumbBlob,
-            displayType: derivatives.displayType,
-            thumbType: derivatives.thumbType,
-            order: nextOrder,
-            createdAt: Date.now()
-          };
-          nextOrder += 1;
-          await Store.addWork(record);
-          created += 1;
-          freshIds.push(record.id);
-        } catch (error) {
-          var message = error && error.message ? error.message : '处理失败';
-          errors.push({ name: file.name || '未命名文件', message: message });
-          if (isQuotaError(error)) {
-            stoppedForQuota = true;
-            errors.push({
-              name: '存储空间',
-              message: '浏览器本地空间不足。请删除部分作品，或换用空间更充足的浏览器后再试。'
-            });
-            break;
-          }
+    async function handleOne(file, index) {
+      updateProgress(index, total, verb + (index + 1) + ' / ' + total + '：' + file.name);
+      try {
+        var derivatives = await Store.createDerivatives(file);
+        var record = {
+          id: Store.randomId(),
+          title: Store.titleFromFilename(file.name),
+          en: '',
+          year: String(new Date().getFullYear()),
+          location: state.profile ? state.profile.location : '',
+          category: '',
+          composition: '',
+          caption: '',
+          width: derivatives.width,
+          height: derivatives.height,
+          displayBlob: derivatives.displayBlob,
+          thumbBlob: derivatives.thumbBlob,
+          displayType: derivatives.displayType,
+          thumbType: derivatives.thumbType,
+          order: nextOrder + index,
+          createdAt: Date.now()
+        };
+        await Store.addWork(record);
+        created += 1;
+        freshIds.push(record.id);
+      } catch (error) {
+        var message = error && error.message ? error.message : '处理失败';
+        errors.push({ name: file.name || '未命名文件', message: message });
+        if (isQuotaError(error)) {
+          stoppedForQuota = true;
+          errors.push({
+            name: '存储空间',
+            message: '浏览器本地空间不足。请删除部分作品，或换用空间更充足的浏览器后再试。'
+          });
         }
-
-        updateProgress(index + 1, total, verb + (index + 1) + ' / ' + total + '…');
-        // 让浏览器有机会刷新界面。
-        await new Promise(function (resolve) {
-          window.setTimeout(resolve, 0);
-        });
       }
+      updateProgress(created + errors.length, total, verb + (created + errors.length) + ' / ' + total + '…');
+    }
+
+    try {
+      for (var start = 0; start < files.length; start += CONCURRENCY) {
+        if (stoppedForQuota) break;
+        var batch = files.slice(start, start + CONCURRENCY);
+        await Promise.all(
+          batch.map(function (file, offset) {
+            return handleOne(file, start + offset);
+          })
+        );
+      }
+      nextOrder += created;
 
       // 新加入的作品在列表里做一次入场动效。
       state.freshIds = freshIds;
@@ -2057,14 +2092,12 @@
       // 因空间不足中断时保留实际进度，不显示成已完成。
       if (!stoppedForQuota) updateProgress(total, total, '');
       var notAdded = files.length - created;
-      var doneLabel = isServerMode() ? '已上传 ' : '已添加 ';
+      var doneLabel = canUploadHere() ? '已上传 ' : '已添加 ';
+      var finalHint = isCloudMode() ? '，已提交到网站，约半分钟后生效。' : canUploadHere() ? '，网站已更新。' : '。';
       if (els.uploadStatus) {
         if (created > 0) {
           els.uploadStatus.textContent =
-            doneLabel +
-            created +
-            ' 件作品' +
-            (notAdded ? '，' + notAdded + ' 件未能处理。' : isServerMode() ? '，网站已更新。' : '。');
+            doneLabel + created + ' 件作品' + (notAdded ? '，' + notAdded + ' 件未能处理。' : finalHint);
         } else {
           els.uploadStatus.textContent = stoppedForQuota
             ? '没有添加作品：浏览器本地空间不足。'
@@ -2082,7 +2115,13 @@
     }
 
     if (created > 0) {
-      showToast(isServerMode() ? '已上传 ' + created + ' 件作品，网站已实时更新。' : '已添加 ' + created + ' 件作品。');
+      showToast(
+        isCloudMode()
+          ? '已提交 ' + created + ' 件作品到网站，约半分钟后刷新就能看到。'
+          : canUploadHere()
+            ? '已上传 ' + created + ' 件作品，网站已实时更新。'
+            : '已添加 ' + created + ' 件作品。'
+      );
       refreshSyncBanner();
     } else if (errors.length) {
       showToast('作品未能添加，请查看错误提示。', true);
@@ -2260,11 +2299,228 @@
     els.toast = $('#toast');
   }
 
+  /* ---------- 云端连接（手机编辑） ---------- */
+
+  var Cloud = window.PortfolioCloud || null;
+
+  /* 什么时候该显示「连接」卡片：
+     - 这台设备还没配好令牌；
+     - 页面是从「线上地址」打开的（本地文件 / 本机服务器不走这条路）。
+     本机服务器模式（http://muqiuchen/、127.0.0.1）保持原来的「只有这台电脑能改」，
+     因为在电脑上双击「启动网站.cmd」的人就是站长本人。 */
+  function needsCloudSetup() {
+    if (!Cloud || typeof Cloud.canWrite !== 'function') return false;
+    if (Cloud.canWrite()) return false;
+    var protocol = window.location.protocol;
+    if (protocol !== 'http:' && protocol !== 'https:') return false;
+    // 本机 / 局域网的服务器版本：沿用原来的逻辑，不弹连接卡片。
+    if (isLocalServerHost()) return false;
+    if (Store && typeof Store.isCloud === 'function' && Store.isCloud()) return false;
+    return true;
+  }
+
+  function isLocalServerHost() {
+    var host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host === 'muqiuchen' || host === 'muqiuchen.local') {
+      return true;
+    }
+    if (host === '[::1]' || host === '::1') return true;
+    if (/^(192\.168|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host)) return true;
+    return false;
+  }
+
+  /* 测试开关：本机上想看「访客会看到什么」时，加 ?gate=1 就行。
+     真实访客在线上访问时没有令牌，自动就会走到连接卡片。 */
+  function gateForcedByQuery() {
+    try {
+      return /[?&]gate=1\b/.test(window.location.search);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setupCloudSetup() {
+    document.body.classList.add('is-cloud-gate');
+    var setup = document.getElementById('cloudSetup');
+    var main = document.getElementById('studioMain');
+    if (setup) setup.hidden = false;
+    if (main) main.classList.add('is-gated');
+
+    var form = document.getElementById('cloudForm');
+    var tokenField = document.getElementById('fieldToken');
+    var ownerField = document.getElementById('fieldOwner');
+    var repoField = document.getElementById('fieldRepo');
+    var branchField = document.getElementById('fieldBranch');
+    var status = document.getElementById('cloudStatus');
+    var connect = document.getElementById('cloudConnect');
+    var skip = document.getElementById('cloudSkip');
+
+    var config = Cloud.getConfig ? Cloud.getConfig() : {};
+    if (ownerField) ownerField.value = config.owner || '';
+    if (repoField) repoField.value = config.repo || '';
+    if (branchField) branchField.value = config.branch || 'main';
+
+    function setStatus(text, isError) {
+      if (!status) return;
+      status.textContent = text || '';
+      status.classList.toggle('is-error', Boolean(isError));
+    }
+
+    if (skip) {
+      skip.addEventListener('click', function () {
+        window.location.href = 'index.html';
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var token = tokenField ? tokenField.value.trim() : '';
+        if (!token) {
+          setStatus('请先粘贴 GitHub 令牌', true);
+          if (tokenField) tokenField.focus();
+          return;
+        }
+
+        Cloud.configure({
+          token: token,
+          owner: (ownerField && ownerField.value.trim()) || config.owner,
+          repo: (repoField && repoField.value.trim()) || config.repo,
+          branch: (branchField && branchField.value.trim()) || 'main'
+        });
+
+        if (connect) connect.disabled = true;
+        setStatus('正在验证令牌…');
+
+        Cloud.probe().then(function (result) {
+          if (connect) connect.disabled = false;
+          if (!result.ok) {
+            setStatus(result.error || '连不上仓库，请检查网络或令牌', true);
+            return;
+          }
+          if (!result.writable) {
+            setStatus(result.reason || '这个令牌没有写入权限', true);
+            return;
+          }
+          setStatus('连接成功，正在打开工作室…');
+          // 令牌存好之后整页重载：store.js 启动时就会走进 cloud 模式。
+          window.setTimeout(function () {
+            window.location.reload();
+          }, 400);
+        });
+      });
+    }
+  }
+
+  /* ---------- 云端面板：清理、断开 ---------- */
+
+  function setupCloudPanel() {
+    var toolbar = document.getElementById('cloudToolbar');
+    var panel = document.getElementById('cloudPanel');
+    var info = document.getElementById('cloudPanelInfo');
+    var note = document.getElementById('cloudPanelNote');
+    var close = document.getElementById('cloudPanelClose');
+    var forget = document.getElementById('cloudForget');
+    var clean = document.getElementById('cloudCleanOrphans');
+
+    if (!panel) return;
+
+    /* 注意：这个函数在 Store.ready 之前就会被调用，那时 getMode() 还是初始值。
+       所以这里用 canWrite() 判断（它只看有没有令牌，不依赖异步探测结果），
+       等 Store.ready 之后再由 syncCloudUI() 补一次。 */
+    function refreshVisibility() {
+      var writable = Boolean(Cloud && Cloud.canWrite && Cloud.canWrite());
+      if (toolbar) toolbar.hidden = !writable;
+      if (!writable) panel.hidden = true;
+      return writable;
+    }
+
+    refreshVisibility();
+    window.__muqSyncCloudUI = refreshVisibility;
+
+    function refreshInfo() {
+      if (!info) return;
+      var cfg = Cloud.getConfig ? Cloud.getConfig() : {};
+      var rate = Cloud.getRateLimit ? Cloud.getRateLimit() : {};
+      var parts = [];
+      parts.push('仓库：' + (cfg.owner || '') + '/' + (cfg.repo || '') + '（' + (cfg.branch || 'main') + '）');
+      if (rate.limit) parts.push('本小时还剩 ' + rate.remaining + ' / ' + rate.limit + ' 次接口调用');
+      info.textContent = parts.join('　·　');
+    }
+
+    if (toolbar) {
+      toolbar.addEventListener('click', function () {
+        var willShow = panel.hidden;
+        panel.hidden = !willShow;
+        if (willShow) refreshInfo();
+      });
+    }
+
+    if (close) {
+      close.addEventListener('click', function () {
+        panel.hidden = true;
+      });
+    }
+
+    if (clean) {
+      clean.addEventListener('click', function () {
+        clean.disabled = true;
+        if (note) note.textContent = '正在检查 media/ 目录…';
+        Cloud.purgeOrphanMedia().then(
+          function (result) {
+            clean.disabled = false;
+            if (note) {
+              note.textContent = result.removed
+                ? '清理完成：删掉 ' + result.removed + ' 张没被用到的图片。'
+                : '很干净：没有多余的图片（共 ' + result.total + ' 个文件）。';
+            }
+          },
+          function (error) {
+            clean.disabled = false;
+            if (note) note.textContent = '清理失败：' + (error && error.message ? error.message : '未知原因');
+          }
+        );
+      });
+    }
+
+    if (forget) {
+      forget.addEventListener('click', function () {
+        var yes = window.confirm('断开后这台设备就变成普通访客，只能看不能改。确定吗？');
+        if (!yes) return;
+        Cloud.forgetToken();
+        window.location.reload();
+      });
+    }
+  }
+
+  /* 页头的「装到主屏」按钮 */
+  function setupInstallButton() {
+    var button = document.getElementById('installApp');
+    if (!button) return;
+    if (window.PortfolioInstall && window.PortfolioInstall.available()) button.hidden = false;
+    button.addEventListener('click', function () {
+      if (!window.PortfolioInstall) return;
+      window.PortfolioInstall.prompt().then(function (outcome) {
+        if (outcome === 'unavailable') {
+          showToast('这个浏览器没有提供安装入口，可以用菜单里的「添加到主屏幕」。');
+        } else if (outcome === 'accepted') {
+          showToast('已装到主屏，下次从桌面图标进来就是全屏的。');
+        }
+      });
+    });
+  }
+
   async function init() {
     cacheElements();
 
     if (!Store) {
       showToast('数据模块没有成功载入，请刷新页面重试。', true);
+      return;
+    }
+
+    // 没连过云端的设备先停在「连接」卡片上，不加载整套后台。
+    if (needsCloudSetup() || gateForcedByQuery()) {
+      setupCloudSetup();
       return;
     }
 
@@ -2279,6 +2535,8 @@
     listenForChanges();
     bindLockEvents();
     refreshAccess();
+    setupCloudPanel();
+    setupInstallButton();
 
     if (typeof Store.getProfileAsync === 'function') {
       Store.getProfileAsync()
@@ -2313,6 +2571,8 @@
         state.modeReady = true;
         renderSyncMode();
         refreshAccess();
+        // 模式这时才确定，云端面板的显示要再刷一次。
+        if (typeof window.__muqSyncCloudUI === 'function') window.__muqSyncCloudUI();
         if (isOnlineMode()) {
           applyOnlineLock();
           updateStorageUsage();
@@ -2320,9 +2580,11 @@
           return;
         }
         if (els.footerNote) {
-          els.footerNote.textContent = isServerMode()
-            ? '资料与作品保存在这台电脑上；在「启动网站.cmd」打开的网址里，手机与电脑看到的是同一份内容，改动实时同步。'
-            : '当前是本地模式（作品只在这个浏览器里）。用「启动网站.cmd」打开网址即可与手机共享同一份内容。';
+          els.footerNote.textContent = isCloudMode()
+            ? '资料与作品直接存到你的 GitHub 仓库，改完约半分钟网站自动更新；电脑不用开机。'
+            : isServerMode()
+              ? '资料与作品保存在这台电脑上；在「启动网站.cmd」打开的网址里，手机与电脑看到的是同一份内容，改动实时同步。'
+              : '当前是本地模式（作品只在这个浏览器里）。用「启动网站.cmd」打开网址即可与手机共享同一份内容。';
         }
         updateStorageUsage();
         refreshSyncBanner();
