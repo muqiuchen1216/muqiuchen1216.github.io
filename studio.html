@@ -381,6 +381,15 @@
         </div>
         <div class="upload-errors" id="uploadErrors" role="alert" hidden></div>
 
+        <!-- 批量操作栏：勾选作品后出现 -->
+        <div class="bulk-bar" id="bulkBar" hidden>
+          <span class="bulk-bar__info">已选 <b id="bulkCount">0</b> 件</span>
+          <div class="bulk-bar__actions">
+            <button class="button button--small bulk-bar__delete" type="button" id="bulkDelete">一键删除选中</button>
+            <button class="button button--ghost button--small" type="button" id="bulkClear">取消选择</button>
+          </div>
+        </div>
+
         <div class="works-list" id="worksList"></div>
 
         <div class="empty-state" id="worksEmpty" hidden>

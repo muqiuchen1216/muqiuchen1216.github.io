@@ -10,6 +10,7 @@
   var state = {
     profile: null,
     works: [],
+    picked: [],  // 批量操作选中的作品 id
     thumbUrls: new Map(),
     ready: false,
     busy: false,
@@ -1390,6 +1391,31 @@
     ratio.className = 'ratio-badge';
     ratio.textContent = Store.formatRatio(work.width, work.height);
     thumb.appendChild(ratio);
+
+      /* 多选框：勾上就可以批量操作（删除）。
+         放在缩略图左上角，一眼能看到、好点。 */
+      var pick = document.createElement('label');
+      pick.className = 'work-editor__pick';
+      pick.title = '选中这件作品（可批量删除）';
+      var pickBox = document.createElement('input');
+      pickBox.type = 'checkbox';
+      pickBox.setAttribute('data-pick', work.id);
+      pickBox.checked = state.picked && state.picked.indexOf(work.id) !== -1;
+      pickBox.addEventListener('change', function () {
+        if (!state.picked) state.picked = [];
+        var idx = state.picked.indexOf(work.id);
+        if (pickBox.checked && idx === -1) state.picked.push(work.id);
+        if (!pickBox.checked && idx !== -1) state.picked.splice(idx, 1);
+        card.classList.toggle('is-picked', pickBox.checked);
+        updateBulkBar();
+      });
+      var pickMark = document.createElement('span');
+      pickMark.className = 'work-editor__pick-mark';
+      pickMark.setAttribute('aria-hidden', 'true');
+      pick.appendChild(pickBox);
+      pick.appendChild(pickMark);
+      thumb.appendChild(pick);
+      if (state.picked && state.picked.indexOf(work.id) !== -1) card.classList.add('is-picked');
     card.appendChild(thumb);
 
     /* 编辑区 */
@@ -1617,6 +1643,107 @@
       renderWorks();
       showToast('已把 ' + index + ' 件作品排到末尾');
     });
+  }
+
+  /* ---------- 批量管理 ---------- */
+
+  function updateBulkBar() {
+    var bar = document.getElementById('bulkBar');
+    if (!bar) return;
+    var picked = state.picked || [];
+    var count = document.getElementById('bulkCount');
+    if (count) count.textContent = String(picked.length);
+    bar.hidden = picked.length === 0;
+  }
+
+  function clearPicks() {
+    state.picked = [];
+    renderWorks();
+    updateBulkBar();
+  }
+
+  /* 一键删除选中的作品。
+     云端模式下是「一次改数据 + 一次扫目录 + 并行删图」，
+     不是逐个删，所以删 3 件和删 1 件花的时间差不多。 */
+  async function deletePickedWorks() {
+    var picked = (state.picked || []).slice();
+    if (!picked.length) return;
+    if (state.busy || state.deleting) return;
+
+    var titles = picked
+      .map(function (id) {
+        var found = state.works.find(function (w) {
+          return w.id === id;
+        });
+        return found ? found.title : '';
+      })
+      .filter(Boolean);
+
+    var tip =
+      picked.length === 1
+        ? '删除《' + titles[0] + '》？此操作无法撤销。'
+        : '删除选中的 ' + picked.length + ' 件作品？此操作无法撤销。' +
+          (titles.length ? '\n\n' + titles.slice(0, 6).join('、') + (titles.length > 6 ? ' 等' : '') : '');
+    if (!window.confirm(tip)) return;
+
+    state.deleting = true;
+    markSelfWrite();
+    var bar = document.getElementById('bulkBar');
+    var deleteBtn = document.getElementById('bulkDelete');
+    if (deleteBtn) {
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = '正在删除 ' + picked.length + ' 件…';
+    }
+
+    try {
+      var lookup = {};
+      picked.forEach(function (id) {
+        lookup[id] = true;
+      });
+
+      /* 先从界面上拿掉，用户立刻看到结果；网络在后台跑。 */
+      state.works = state.works.filter(function (w) {
+        return !lookup[w.id];
+      });
+      state.picked = [];
+      pruneWorkUrls();
+      renderWorks();
+      updateStorageUsage();
+      if (bar) bar.hidden = true;
+
+      var removed = await Store.deleteWorks(picked);
+      showToast('已删除 ' + removed + ' 件作品');
+      showSaveIndicator('已删除 ' + removed + ' 件', false);
+    } catch (error) {
+      showToast(error && error.message ? error.message : '批量删除失败，请重试', true);
+      /* 失败就把列表重新拉回来，避免界面和数据不一致 */
+      try {
+        await loadWorks();
+      } catch (refreshError) {
+        /* 忽略 */
+      }
+    } finally {
+      state.deleting = false;
+      if (deleteBtn) {
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = '一键删除选中';
+      }
+      updateBulkBar();
+    }
+  }
+
+  /* 全选 / 取消全选 */
+  function togglePickAll() {
+    var all = (state.works || []).map(function (w) {
+      return w.id;
+    });
+    if (state.picked && state.picked.length === all.length) {
+      state.picked = [];
+    } else {
+      state.picked = all;
+    }
+    renderWorks();
+    updateBulkBar();
   }
 
   function finishPendingWork(card, id, button) {
@@ -2750,6 +2877,17 @@
   function setupWorksEvents() {
     els.worksList.addEventListener('click', handleWorksListClick);
     setupWorkDragging();
+
+    /* 批量操作栏的按钮 */
+    var bulkDeleteEl = document.getElementById('bulkDelete');
+    if (bulkDeleteEl) {
+      bulkDeleteEl.addEventListener('click', deletePickedWorks);
+    }
+    var bulkClearEl = document.getElementById('bulkClear');
+    if (bulkClearEl) {
+      bulkClearEl.addEventListener('click', clearPicks);
+    }
+    updateBulkBar();
   }
 
   function cacheElements() {

@@ -169,6 +169,74 @@
       color: #c8a86b;
     }
 
+    /* 换浏览器安装区块 */
+    .ip-copy__text {
+      margin: 0 0 14px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: rgba(240, 237, 231, 0.72);
+    }
+
+    .ip-copy__url {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(200, 168, 107, 0.35);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .ip-copy__url code {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 13.5px;
+      color: #e8cf9a;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ip-copy__btn {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 8px 18px;
+      border: 1px solid rgba(200, 168, 107, 0.6);
+      border-radius: 9px;
+      background: rgba(200, 168, 107, 0.16);
+      color: #e8cf9a;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .ip-qr {
+      margin: 18px auto 0;
+      width: 168px;
+      height: 168px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .ip-qr img {
+      display: block;
+      width: 152px;
+      height: 152px;
+    }
+
+    .ip-copy__hint {
+      margin: 10px 0 0;
+      text-align: center;
+      font-size: 11.5px;
+      color: rgba(240, 237, 231, 0.42);
+    }
+
     .ip-detect {
       margin: 0 0 18px;
       text-align: center;
@@ -193,6 +261,20 @@
     <section class="ip-section" id="ipManual">
       <h2>手动安装（各浏览器）</h2>
       <ol class="ip-steps" id="ipManualSteps"></ol>
+    </section>
+
+    <section class="ip-section ip-copy">
+      <h2>换浏览器安装</h2>
+      <p class="ip-copy__text">
+        如果当前浏览器装不了，用手机自带的浏览器或 Chrome 打开同一个网址就行。
+        下面是网址和二维码：
+      </p>
+      <div class="ip-copy__url">
+        <code id="ipUrl">muqiuchen1216.github.io</code>
+        <button class="ip-copy__btn" type="button" id="ipCopy">复制</button>
+      </div>
+      <div class="ip-qr" id="ipQr"></div>
+      <p class="ip-copy__hint">用另一台设备扫这个码，或把网址发给自己。</p>
     </section>
 
     <a class="ip-back" href="index.html">← 先看看作品</a>
@@ -319,6 +401,52 @@
         state.textContent = '已装好，回桌面看看新图标吧。';
         button.hidden = true;
       });
+
+      /* 复制网址 */
+      var copyBtn = document.getElementById('ipCopy');
+      var urlEl = document.getElementById('ipUrl');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+          var text = urlEl ? urlEl.textContent.trim() : location.host;
+          var done = function () {
+            copyBtn.textContent = '已复制';
+            window.setTimeout(function () {
+              copyBtn.textContent = '复制';
+            }, 1600);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, done);
+          } else {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+              document.execCommand('copy');
+            } catch (e) {}
+            document.body.removeChild(ta);
+            done();
+          }
+        });
+      }
+
+      /* 二维码：用 api.qrserver.com 生成图片，失败就不显示（不报错） */
+      var qrBox = document.getElementById('ipQr');
+      if (qrBox) {
+        var pageUrl = (location.origin + location.pathname).replace(/install\.html$/, '');
+        var img = document.createElement('img');
+        img.alt = '网站二维码';
+        img.width = 168;
+        img.height = 168;
+        img.loading = 'lazy';
+        img.src =
+          'https://api.qrserver.com/v1/create-qr-code/?size=336x336&margin=8&data=' +
+          encodeURIComponent(pageUrl);
+        img.onerror = function () {
+          qrBox.hidden = true;
+        };
+        qrBox.appendChild(img);
+      }
 
       setTimeout(refreshButton, 600);
       setTimeout(refreshButton, 2500);

@@ -47,11 +47,11 @@
   var PROFILE_KEY = 'quiet-light.profile.v1';
   var PROFILE_STAMP_KEY = 'quiet-light.profile.updated';
   var MAX_FILE_BYTES = 60 * 1024 * 1024;
-  var DISPLAY_EDGE = 2600;
+var DISPLAY_EDGE = 2000;
   /* 缩略图长边。原来 1400px 太大：工作室列表里只显示约 90px 宽，
      首页卡片也就几百 px，1400 属于白白多传几百 KB。
      900px 在 3 倍屏上看依然清晰，体积大约只有三分之一。 */
-  var THUMB_EDGE = 900;
+var THUMB_EDGE = 720;
 
   var API_BASE = '/__muqiuchen__/api';
   var JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -599,6 +599,40 @@
     });
   }
 
+  /* 批量删除：一次改数据、一次扫目录、并行删图。
+     单张删除每件都要：读数据 → 写数据 → 扫目录 → 删图，
+     删 3 件就重复三遍；批量只做一遍，快得多。 */
+  function deleteWorksCloud(ids) {
+    var list = (ids || []).filter(function (id) {
+      return typeof id === 'string';
+    });
+    if (!list.length) return Promise.resolve(0);
+
+    var lookup = {};
+    list.forEach(function (id) {
+      lookup[id] = true;
+    });
+
+    return Cloud.mutateSite(function (site) {
+      site.works = site.works.filter(function (work) {
+        return !lookup[work.id];
+      });
+    }, '批量删除 ' + list.length + ' 件作品').then(function (site) {
+      if (site && typeof site.revision === 'number') lastRevision = Math.max(lastRevision, site.revision);
+      siteSnapshot = null;
+      publishedWorks = null;
+
+      /* 数据已经写好了，图片清理在后台并行做：不阻塞界面更新，
+         用户点完立刻看到列表变短。 */
+      if (Cloud.purgeMediaForWorks) {
+        Cloud.purgeMediaForWorks(list).catch(function () {
+          /* 清理失败不影响删除本身 */
+        });
+      }
+      return list.length;
+    });
+  }
+
   function deleteWorkCloud(id) {
     return Cloud.mutateSite(function (site) {
       site.works = site.works.filter(function (work) {
@@ -1095,6 +1129,22 @@
     });
   }
 
+  /* 本地模式的批量删除：逐个删 IndexedDB 记录。 */
+  function deleteWorksLocal(ids) {
+    var chain = Promise.resolve();
+    var count = 0;
+    (ids || []).forEach(function (id) {
+      chain = chain.then(function () {
+        return deleteWorkLocal(id).then(function () {
+          count += 1;
+        });
+      });
+    });
+    return chain.then(function () {
+      return count;
+    });
+  }
+
   function deleteWorkLocal(id) {
     return openDatabase().then(function (database) {
       return new Promise(function (resolve, reject) {
@@ -1568,7 +1618,7 @@
         THUMB_EDGE,
         0.82
       );
-      var displayPromise = encodeCanvas(displayCanvas, 0.9);
+      var displayPromise = encodeCanvas(displayCanvas, 0.86);
       var results = await Promise.all([displayPromise, thumbPromise]);
       displayBlob = results[0];
       thumbBlob = results[1];
@@ -1725,6 +1775,30 @@
       if (mode === 'cloud') return updateWorkCloud(id, patch);
       if (mode === 'static') throw new Error(READ_ONLY_MESSAGE);
       return updateWorkLocal(id, patch);
+    });
+  }
+
+  function deleteWorks(ids) {
+    return readyPromise.then(function () {
+      if (mode === 'cloud') return deleteWorksCloud(ids);
+      if (mode === 'server' || mode === 'static') {
+        /* 服务器模式和只读模式：逐个删（服务器没有批量接口） */
+        var chain = Promise.resolve();
+        var count = 0;
+        (ids || []).forEach(function (id) {
+          chain = chain.then(function () {
+            return deleteWork(id).then(function () {
+              count += 1;
+            });
+          });
+        });
+        return chain.then(function () {
+          return count;
+        });
+      }
+      return deleteWorksLocal(ids).then(function () {
+        return (ids || []).length;
+      });
     });
   }
 
@@ -1886,6 +1960,7 @@
     addWork: addWork,
     updateWork: updateWork,
     deleteWork: deleteWork,
+    deleteWorks: deleteWorks,
     reorderWorks: reorderWorks,
     getProfile: getProfile,
     getProfileAsync: getProfileAsync,

@@ -448,6 +448,29 @@
     });
   }
 
+  /* 已知 sha 时直接删，省掉「先读一次拿 sha」的那趟请求。
+     目录列表接口返回的每一项本身就带 sha，批量删图时用这个能快一倍。 */
+  function deleteFileWithSha(path, sha, message) {
+    if (!sha) return deleteFile(path, message);
+    var url = repoBase() + '/contents/' + encodePath(path);
+    return request(url, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message || '删除文件', sha: sha, branch: config.branch }),
+      timeout: 30000
+    }).then(
+      function () {
+        lastWriteAt = Date.now();
+        return true;
+      },
+      function (error) {
+        if (error && error.status === 404) return true;
+        if (error && error.status === 409) return deleteFile(path, message);
+        throw error;
+      }
+    );
+  }
+
   /* ---------- 业务封装：整份站点数据 ---------- */
 
   /* 写 data/site.json 必须串行：
@@ -612,7 +635,8 @@
         function worker() {
           if (!queue.length) return Promise.resolve();
           var item = queue.shift();
-          return deleteFile(MEDIA_DIR + '/' + item.name, '清理旧图片')
+          /* 目录列表项自带 sha，直接用它删，省掉一次读请求。 */
+          return deleteFileWithSha(MEDIA_DIR + '/' + item.name, item.sha, '清理旧图片')
             .then(
               function () {
                 removed += 1;
@@ -624,7 +648,7 @@
             .then(worker);
         }
         var workers = [];
-        for (var w = 0; w < 4; w += 1) workers.push(worker());
+        for (var w = 0; w < 6; w += 1) workers.push(worker());
         return Promise.all(workers).then(function () {
           return removed;
         });
@@ -637,6 +661,60 @@
   /* 全量清理：把 media/ 里没有任何作品引用的文件全删掉。
      用于「删完还是留下几张」的兜底 —— 并发、重试、断网都可能留下残图。
      返回删掉的数量。 */
+  /* 批量清理多个作品留下的图片。
+     一次读目录拿到全部 sha，然后 6 路并行删 ——
+     比逐个作品调 purgeMediaForWork 快好几倍（那要重复扫目录）。 */
+  function purgeMediaForWorks(ids) {
+    if (!canWrite()) return Promise.resolve(0);
+    var prefixes = (ids || [])
+      .filter(function (id) {
+        return /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(String(id || ''));
+      })
+      .map(function (id) {
+        return String(id) + '-';
+      });
+    if (!prefixes.length) return Promise.resolve(0);
+
+    return request(repoBase() + '/contents/' + encodePath(MEDIA_DIR) + '?ref=' + encodeURIComponent(config.branch), {
+      timeout: 15000
+    })
+      .then(function (list) {
+        if (!Array.isArray(list)) return [];
+        return list.filter(function (item) {
+          if (!item || !item.name) return false;
+          return prefixes.some(function (prefix) {
+            return item.name.indexOf(prefix) === 0;
+          });
+        });
+      })
+      .then(function (stale) {
+        var removed = 0;
+        var queue = stale.slice();
+        function worker() {
+          if (!queue.length) return Promise.resolve();
+          var item = queue.shift();
+          return deleteFileWithSha(MEDIA_DIR + '/' + item.name, item.sha, '清理旧图片')
+            .then(
+              function () {
+                removed += 1;
+              },
+              function () {
+                /* 单个失败继续 */
+              }
+            )
+            .then(worker);
+        }
+        var workers = [];
+        for (var w = 0; w < 6; w += 1) workers.push(worker());
+        return Promise.all(workers).then(function () {
+          return removed;
+        });
+      })
+      .catch(function () {
+        return 0;
+      });
+  }
+
   function purgeOrphanMedia() {
     if (!canWrite()) return Promise.resolve({ removed: 0, total: 0 });
 
@@ -733,6 +811,7 @@
     uploadMedia: uploadMedia,
     deleteMedia: deleteMedia,
     purgeMediaForWork: purgeMediaForWork,
+    purgeMediaForWorks: purgeMediaForWorks,
     purgeOrphanMedia: purgeOrphanMedia,
     probe: probe,
     utf8ToBytes: utf8ToBytes,
