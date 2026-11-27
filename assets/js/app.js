@@ -15,6 +15,20 @@
     studio: '棚拍',
     outdoor: '外景'
   };
+  /* 自定义分类在数据里存成 `custom:夜景` 这种形式。
+     显示时去掉前缀；排序时排在内置类型后面。 */
+  var CUSTOM_CATEGORY_PREFIX = 'custom:';
+  var CATEGORY_ORDER = ['cinematic', 'onlocation', 'studio', 'outdoor', 'cinematic-outdoor', 'composite'];
+
+  function isCustomCategory(value) {
+    return typeof value === 'string' && value.indexOf(CUSTOM_CATEGORY_PREFIX) === 0;
+  }
+
+  function categoryLabelOf(value) {
+    if (!value) return '';
+    if (isCustomCategory(value)) return value.slice(CUSTOM_CATEGORY_PREFIX.length);
+    return CATEGORY_LABELS[value] || value;
+  }
   /* 组合类型（外景 + 电影感）在卡片与筛选里用同一种金色标记，
      和另外两个独立类型区分开。 */
   var COMBO_CATEGORIES = { 'cinematic-outdoor': true };
@@ -522,7 +536,7 @@
       year: safeText(work.year),
       location: safeText(work.location),
       category: safeText(work.category),
-      categoryLabel: CATEGORY_LABELS[work.category] || '',
+      categoryLabel: categoryLabelOf(work.category),
       composition: composition,
       compositionLabel: manualComposition ? COMPOSITION_LABELS[manualComposition] : '',
       orientation: manualComposition || autoOrientation(ratio),
@@ -643,6 +657,7 @@
       showToast('有 ' + pendingRemote + ' 件作品还在上传中，稍后会自动出现。');
     }
 
+    renderCategoryFilter();
     renderYearFilter();
     applyFilters();
   }
@@ -718,6 +733,54 @@
     if (work && work.orientation) return work.orientation;
     if (work && COMPOSITION_LABELS[work.composition]) return work.composition;
     return autoOrientation(work ? work.ratio : 1);
+  }
+
+  /* 作品范围的筛选项按数据动态生成：
+     内置 6 个固定在前面，之后是作品里实际出现过的自定义分类。
+     在工作室里新加一个自定义类型、给它标了作品，这里就会自动多一颗胶囊。 */
+  function renderCategoryFilter() {
+    if (!els.filterCategory) return;
+
+    var present = {};
+    state.works.forEach(function (work) {
+      if (work && work.category) present[work.category] = true;
+    });
+
+    /* 内置类型：全部显示（哪怕 0 件也显示，保持界面稳定），
+       除非它从没被用过 —— 那样只会在视觉上堆一排 0。 */
+    var entries = [{ value: 'all', label: '全部' }];
+    CATEGORY_ORDER.forEach(function (value) {
+      entries.push({ value: value, label: CATEGORY_LABELS[value] || value });
+    });
+
+    /* 自定义类型：只显示真正有作品在用的，按作品出现顺序 */
+    var customs = [];
+    state.works.forEach(function (work) {
+      var value = work && work.category;
+      if (!isCustomCategory(value)) return;
+      if (customs.indexOf(value) === -1) customs.push(value);
+    });
+    customs.forEach(function (value) {
+      entries.push({ value: value, label: categoryLabelOf(value), custom: true });
+    });
+
+    /* 当前选中的分类被删光了就退回「全部」，否则会出现筛选后一片空白 */
+    if (state.filterCategory !== 'all' && !present[state.filterCategory]) {
+      state.filterCategory = 'all';
+    }
+
+    clearNode(els.filterCategory);
+    entries.forEach(function (entry) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'filter-pill';
+      if (entry.custom) button.classList.add('filter-pill--custom');
+      if (entry.value === 'cinematic-outdoor') button.classList.add('filter-pill--combo');
+      button.setAttribute('data-filter-group', 'category');
+      button.setAttribute('data-filter-value', entry.value);
+      button.textContent = entry.label;
+      els.filterCategory.appendChild(button);
+    });
   }
 
   function renderYearFilter() {

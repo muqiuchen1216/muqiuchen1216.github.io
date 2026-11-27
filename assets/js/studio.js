@@ -955,6 +955,170 @@
     return label;
   }
 
+  /* ---------- 作品范围（支持自定义分类） ---------- */
+
+  var CATEGORY_PRESETS = [
+    { value: '', label: '未分类' },
+    { value: 'cinematic', label: '电影感' },
+    { value: 'onlocation', label: '场照' },
+    { value: 'studio', label: '棚拍' },
+    { value: 'outdoor', label: '外景' },
+    { value: 'cinematic-outdoor', label: '外景 + 电影感' },
+    { value: 'composite', label: '大合成' }
+  ];
+
+  /* 自定义分类的值统一加 `custom:` 前缀。
+     这样它和内置的英文 key 永远不会撞，首页一眼就能认出「这是自己写的」，
+     显示时去掉前缀直接用用户输入的文字。 */
+  var CUSTOM_PREFIX = 'custom:';
+
+  function isCustomCategory(value) {
+    return typeof value === 'string' && value.indexOf(CUSTOM_PREFIX) === 0;
+  }
+
+  function customCategoryText(value) {
+    return isCustomCategory(value) ? value.slice(CUSTOM_PREFIX.length) : '';
+  }
+
+  /* 把一批作品里出现过的自定义分类收集起来（去重、保持出现顺序）。 */
+  function collectCustomCategories(works) {
+    var seen = {};
+    var list = [];
+    (works || []).forEach(function (work) {
+      var value = work && work.category;
+      if (!isCustomCategory(value)) return;
+      if (seen[value]) return;
+      seen[value] = true;
+      list.push(value);
+    });
+    return list;
+  }
+
+  /* 作品范围字段：一排胶囊 + 一个「+ 自定义」。
+     点「+ 自定义」变成输入框，打完回车就生效，
+     这个新分类会自动出现在作品列表里所有卡片的胶囊中，
+     也会自动出现在首页的筛选标签里（首页按数据动态生成）。 */
+  function makeCategoryField(work, onChange) {
+    var wrap = document.createElement('div');
+    wrap.className = 'field work-fields__category';
+
+    var label = document.createElement('span');
+    label.textContent = '作品范围';
+    wrap.appendChild(label);
+
+    var current = work.category || '';
+
+    /* 可选值 = 内置预设 + 全站已用过的自定义分类 */
+    var choices = CATEGORY_PRESETS.slice();
+    var extra = collectCustomCategories(state.works);
+    extra.forEach(function (value) {
+      choices.push({ value: value, label: customCategoryText(value) });
+    });
+    // 当前作品用的自定义值可能在列表里还没出现（新加的），补进去
+    if (isCustomCategory(current) && !extra.some(function (v) { return v === current; })) {
+      choices.push({ value: current, label: customCategoryText(current) });
+    }
+
+    var pills = document.createElement('div');
+    pills.className = 'category-pills';
+
+    var inputRow = document.createElement('div');
+    inputRow.className = 'category-input';
+    inputRow.hidden = true;
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 20;
+    input.placeholder = '输入新的分类名，回车确认';
+    input.setAttribute('aria-label', '自定义作品范围');
+
+    var confirm = document.createElement('button');
+    confirm.type = 'button';
+    confirm.className = 'button button--small';
+    confirm.textContent = '确定';
+
+    var cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'button button--ghost button--small';
+    cancel.textContent = '取消';
+
+    inputRow.appendChild(input);
+    inputRow.appendChild(confirm);
+    inputRow.appendChild(cancel);
+
+    function renderPills() {
+      clearNode(pills);
+      choices.forEach(function (choice) {
+        var pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'category-pill';
+        if (isCustomCategory(choice.value)) pill.classList.add('category-pill--custom');
+        pill.textContent = choice.label;
+        if ((current || '') === choice.value) pill.classList.add('is-active');
+        pill.addEventListener('click', function () {
+          if ((current || '') === choice.value) return;
+          current = choice.value;
+          renderPills();
+          onChange(current);
+        });
+        pills.appendChild(pill);
+      });
+
+      var add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'category-pill category-pill--add';
+      add.innerHTML = '<span aria-hidden="true">+</span> 自定义';
+      add.addEventListener('click', function () {
+        inputRow.hidden = false;
+        input.value = '';
+        input.focus();
+      });
+      pills.appendChild(add);
+    }
+
+    function commitCustom() {
+      var text = String(input.value || '').trim().slice(0, 20);
+      if (!text) {
+        inputRow.hidden = true;
+        return;
+      }
+      // 已经存在的同名自定义分类，直接复用，避免出现两个一样的标签
+      var existing = choices.find(function (c) {
+        return isCustomCategory(c.value) && c.label === text;
+      });
+      var value = existing ? existing.value : CUSTOM_PREFIX + text;
+      if (!existing) choices.push({ value: value, label: text });
+      current = value;
+      inputRow.hidden = true;
+      renderPills();
+      onChange(current);
+    }
+
+    confirm.addEventListener('click', commitCustom);
+    input.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commitCustom();
+      } else if (event.key === 'Escape') {
+        inputRow.hidden = true;
+      }
+    });
+    cancel.addEventListener('click', function () {
+      inputRow.hidden = true;
+    });
+
+    renderPills();
+    wrap.appendChild(pills);
+    wrap.appendChild(inputRow);
+
+    var hint = document.createElement('span');
+    hint.className = 'field-hint';
+    hint.textContent = '点「+ 自定义」可以自己起一个类型，例如「夜景」「和风」。新类型会自动出现在首页筛选项里。';
+    wrap.appendChild(hint);
+
+    return wrap;
+  }
+
   function makeSelectField(labelText, field, value, choices, className) {
     var label = document.createElement('label');
     label.className = 'field' + (className ? ' ' + className : '');
@@ -1180,21 +1344,9 @@
       makeField('拍摄地', 'location', work.location, { maxlength: 80, placeholder: '城市 / 地点' })
     );
     fields.appendChild(
-      makeSelectField(
-        '作品范围',
-        'category',
-        work.category,
-        [
-          { value: '', label: '未分类' },
-          { value: 'cinematic', label: '电影感' },
-          { value: 'onlocation', label: '场照' },
-          { value: 'studio', label: '棚拍' },
-          { value: 'outdoor', label: '外景' },
-          { value: 'cinematic-outdoor', label: '外景 + 电影感（组合）' },
-          { value: 'composite', label: '大合成' }
-        ],
-        'work-fields__category'
-      )
+      makeCategoryField(work, function onChange(nextValue) {
+        saveCategory(card, work.id, nextValue, status);
+      })
     );
     fields.appendChild(makeCompositionField(work));
     fields.appendChild(
@@ -1255,6 +1407,38 @@
     });
 
     return card;
+  }
+
+  /* 保存分类。它走的是和普通字段一样的一条路：
+     写进作品 → 首页重新渲染时按数据动态生成筛选项。
+     不同点只是它可能带 `custom:` 前缀（自定义类型）。 */
+  function saveCategory(card, id, value, status) {
+    if (status) {
+      status.classList.remove('is-error');
+      status.textContent = '保存中…';
+    }
+    markSelfWrite();
+
+    Store.updateWork(id, { category: value })
+      .then(function (updated) {
+        var current = state.works.find(function (item) {
+          return item.id === id;
+        });
+        if (current && updated) {
+          current.category = updated.category;
+        }
+        if (status) {
+          status.textContent = isCustomCategory(value)
+            ? '已保存，新分类「' + customCategoryText(value) + '」已加入'
+            : '已保存';
+        }
+      })
+      .catch(function (error) {
+        if (status) {
+          status.classList.add('is-error');
+          status.textContent = error && error.message ? error.message : '保存失败';
+        }
+      });
   }
 
   function saveWorkField(card, id, input, status) {

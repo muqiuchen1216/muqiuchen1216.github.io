@@ -2269,3 +2269,125 @@ body.is-dragging-work .work-editor {
 #cloudStatus.is-error {
   color: #ff9d80 !important;
 }
+
+/* ---------- 作品范围：胶囊 + 自定义 ---------- */
+/* 用胶囊而不是原生 select：深色主题下系统下拉面板会出现白底浅字看不清。
+   胶囊的点击区域也比下拉小三角大得多，手机上更好点。 */
+
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink, #ece7de);
+  font-size: 12.5px;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.category-pill:hover {
+  border-color: var(--accent, #c8a86b);
+}
+
+.category-pill.is-active {
+  border-color: var(--accent, #c8a86b);
+  background: var(--accent, #c8a86b);
+  color: #19140c;
+  font-weight: 600;
+}
+
+/* 自定义类型用虚线边，一眼区分「内置」和「自己写的」 */
+.category-pill--custom {
+  border-style: dashed;
+  border-color: rgba(200, 168, 107, 0.55);
+}
+
+.category-pill--custom.is-active {
+  border-style: solid;
+}
+
+.category-pill--add {
+  border-style: dashed;
+  border-color: rgba(200, 168, 107, 0.45);
+  color: var(--accent, #c8a86b);
+}
+
+.category-pill--add:hover {
+  background: rgba(200, 168, 107, 0.12);
+}
+
+.category-pill--add span[aria-hidden] {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* 自定义输入行 */
+.category-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.category-input[hidden] {
+  display: none;
+}
+
+.category-input input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 1.5px solid rgba(200, 168, 107, 0.5);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f1ea;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.category-input input::placeholder {
+  color: rgba(236, 231, 222, 0.35);
+}
+
+.category-input input:focus {
+  outline: none;
+  border-color: var(--accent, #c8a86b);
+  background: rgba(200, 168, 107, 0.09);
+}
+
+.category-input .button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+@media (max-width: 520px) {
+  .category-pill {
+    min-height: 38px;
+    padding: 9px 15px;
+    font-size: 13px;
+  }
+
+  .category-input {
+    flex-wrap: wrap;
+  }
+
+  .category-input input {
+    flex: 1 1 100%;
+  }
+}

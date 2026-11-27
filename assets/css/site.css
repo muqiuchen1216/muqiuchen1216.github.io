@@ -2745,3 +2745,62 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+/* 首页筛选里：自定义分类的胶囊用虚线边区分 */
+.filter-pill--custom {
+  border-style: dashed;
+  border-color: rgba(200, 168, 107, 0.55);
+}
+
+.filter-pill--custom.is-active {
+  border-style: solid;
+}
+
+/* =========================================================
+   流畅度优化：收紧「每帧都要重算」的样式
+   ---------------------------------------------------------
+   手机上感觉卡，通常不是 JS 慢，而是合成器每帧要重做这些事：
+     1. sticky + backdrop-filter：整条顶栏常驻，滚动时每帧对身后内容做高斯模糊；
+     2. fixed + backdrop-filter 的浮动按钮：同上，而且一直悬浮在内容上；
+     3. will-change 长期挂着：白占一个合成层和显存。
+   做法：这些位置改用「接近不透明的底色」代替模糊 —— 深色站视觉差别极小，
+   但省掉每帧的模糊 pass。真正需要模糊的地方（灯箱打开时）保留。
+   ========================================================= */
+
+/* 顶栏：底色提到接近不透明，模糊半径减到 3px（几乎看不出，但省一半开销） */
+.topbar {
+  background: rgba(10, 11, 13, 0.97);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* 浮动安装按钮：去掉模糊，用实色 + 细边框，观感不变但不再逐帧重算 */
+.install-fab {
+  background: #1a1d22;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  will-change: transform;
+}
+
+/* 灯箱图片：只在打开时才需要合成提示，关着的时候不要常驻 */
+.lightbox:not(.is-open) .lightbox__image {
+  will-change: auto;
+}
+
+/* 长列表里的卡片：用 content-visibility 让屏幕外的部分跳过渲染。
+   22 张卡片时收益有限，但作品会越加越多，提前做好。 */
+.work-entry {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
+}
+
+/* 滚动性能：告诉浏览器这些容器不会被外部影响，可以独立优化 */
+.gallery {
+  contain: layout style;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-entry {
+    content-visibility: visible;
+  }
+}

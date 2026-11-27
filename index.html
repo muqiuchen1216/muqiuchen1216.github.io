@@ -91,15 +91,9 @@
           </div>
           <div class="filter-row">
             <span class="filter-label">作品范围</span>
-            <div class="filter-pills" id="filterCategory" role="group" aria-label="按作品范围筛选">
-              <button class="filter-pill is-active" type="button" data-filter-group="category" data-filter-value="all" aria-pressed="true">全部</button>
-              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="cinematic" aria-pressed="false">电影感</button>
-              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="onlocation" aria-pressed="false">场照</button>
-              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="studio" aria-pressed="false">棚拍</button>
-              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="outdoor" aria-pressed="false">外景</button>
-              <button class="filter-pill filter-pill--combo" type="button" data-filter-group="category" data-filter-value="cinematic-outdoor" aria-pressed="false">外景 + 电影感</button>
-              <button class="filter-pill" type="button" data-filter-group="category" data-filter-value="composite" aria-pressed="false">大合成</button>
-            </div>
+            <!-- 胶囊由 app.js 的 renderCategoryFilter() 按作品数据动态生成：
+                 内置 6 个类型 + 你在工作室里自定义的类型。 -->
+            <div class="filter-pills" id="filterCategory" role="group" aria-label="按作品范围筛选"></div>
           </div>
           <div class="filter-row">
             <span class="filter-label">拍摄年度</span>
