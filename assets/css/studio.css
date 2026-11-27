@@ -2505,3 +2505,98 @@ body.is-dragging-work .works-list {
 .work-editor__thumb {
   position: relative;
 }
+
+/* =========================================================
+   待完善区：刚导入、还没填资料的作品
+   ========================================================= */
+
+.pending-section {
+  margin: 0 0 26px;
+  padding: 16px 16px 6px;
+  border: 1.5px dashed rgba(200, 168, 107, 0.5);
+  border-radius: 16px;
+  background: rgba(200, 168, 107, 0.05);
+}
+
+.pending-section__head {
+  margin-bottom: 14px;
+}
+
+.pending-section__title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent, #c8a86b);
+}
+
+.pending-section__hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: rgba(236, 231, 222, 0.62);
+}
+
+.pending-section__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 待完善的卡片：金色虚线边，和正式作品区分 */
+.work-editor.is-pending {
+  border-color: rgba(200, 168, 107, 0.55);
+  border-style: dashed;
+}
+
+/* 「完成」按钮：金色实心，最显眼 */
+.work-editor__done {
+  min-height: 32px;
+  padding: 7px 16px;
+  border: 1px solid #d4b478;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d4b478, #b8944f);
+  color: #14161a;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(200, 168, 107, 0.3);
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.work-editor__done:hover {
+  filter: brightness(1.08);
+}
+
+.work-editor__done:active {
+  transform: scale(0.96);
+}
+
+.work-editor__done:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 缩略图加载占位：加载完成前是深色底 + 微光，不是刺眼的空白 */
+.work-editor__thumb {
+  background: #16181d;
+}
+
+.work-editor__thumb img {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.work-editor__thumb.is-loaded img {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .work-editor__done {
+    min-height: 38px;
+    padding: 9px 18px;
+    font-size: 14px;
+  }
+}

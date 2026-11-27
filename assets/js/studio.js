@@ -1246,7 +1246,38 @@
     return wrap;
   }
 
-  function createWorkEditor(work, index, enterIndex) {
+  /* 待完善区：刚导入、还没填资料的作品。
+     每张卡片带一个「完成」按钮，点它才真正排到正式列表末尾。 */
+  function createPendingSection(works) {
+    var section = document.createElement('section');
+    section.className = 'pending-section';
+
+    var head = document.createElement('div');
+    head.className = 'pending-section__head';
+
+    var title = document.createElement('h3');
+    title.className = 'pending-section__title';
+    title.textContent = '待完善 ' + works.length + ' 件';
+
+    var hint = document.createElement('p');
+    hint.className = 'pending-section__hint';
+    hint.textContent = '填好作品范围和构图后，点「完成」就会排到下方正式列表的末尾。';
+
+    head.appendChild(title);
+    head.appendChild(hint);
+    section.appendChild(head);
+
+    var list = document.createElement('div');
+    list.className = 'pending-section__list';
+    works.forEach(function (work, index) {
+      list.appendChild(createWorkEditor(work, index, -1, true));
+    });
+    section.appendChild(list);
+
+    return section;
+  }
+
+  function createWorkEditor(work, index, enterIndex, isPending) {
     var card = document.createElement('article');
     card.className = 'work-editor';
     card.setAttribute('data-id', work.id);
@@ -1305,12 +1336,26 @@
     if (thumbUrl) {
       var image = document.createElement('img');
       image.alt = work.title ? work.title : '作品缩略图';
-      image.loading = 'lazy';
+      /* 工作室里不要懒加载。
+         列表卡片很高，一屏只看得到 2~3 张，懒加载会让快速滑动时看到一片灰框，
+         用起来像「缩略图坏了」。工作室总共才几十件，
+         直接 eager 全部拉下来（走本地服务器或已缓存），反而更顺。
+         占位颜色由 CSS 的 .work-editor__thumb 背景负责，不会白闪。 */
+      image.loading = 'eager';
       image.decoding = 'async';
       /* 关掉浏览器自带的图片拖拽，不然长按拖卡片会变成拖图片 */
       image.draggable = false;
+      image.addEventListener('load', function () {
+        thumb.classList.add('is-loaded');
+      });
       image.src = thumbUrl;
       image.addEventListener('error', function () {
+        /* 一次失败再试一次：服务器刚重启、或临时网络抖动时很常见 */
+        if (!image.dataset.retried) {
+          image.dataset.retried = '1';
+          image.src = thumbUrl + '?r=' + Date.now();
+          return;
+        }
         if (image.parentNode) image.parentNode.removeChild(image);
         var fallback = document.createElement('p');
         fallback.className = 'work-editor__thumb-fallback';
@@ -1359,6 +1404,23 @@
     actions.appendChild(up);
     actions.appendChild(down);
     actions.appendChild(remove);
+
+        /* 待完善的作品：行动区加一个「完成」按钮。
+           点它才把 pending 清掉、真正排到正式列表末尾。 */
+        if (isPending) {
+          var doneBtn = document.createElement('button');
+          doneBtn.type = 'button';
+          doneBtn.className = 'work-editor__done';
+          doneBtn.textContent = '完成';
+          doneBtn.title = '资料填好后点这里，作品会排到列表末尾';
+          doneBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            finishPendingWork(card, work.id, doneBtn);
+          });
+          actions.insertBefore(doneBtn, actions.firstChild);
+          card.classList.add('is-pending');
+        }
     top.appendChild(indexLabel);
     top.appendChild(actions);
     body.appendChild(top);
@@ -1469,6 +1531,51 @@
           status.classList.add('is-error');
           status.textContent = error && error.message ? error.message : '保存失败';
         }
+      });
+  }
+
+  /* 把「待完善」的作品转正：
+     点「完成」时，给它一个真正排在末尾的序号，并清掉 pending。
+     没填作品范围 / 构图也允许完成（不强求），但会顺手给个提醒。 */
+  function finishPendingWork(card, id, button) {
+    var work = state.works.find(function (item) {
+      return item.id === id;
+    });
+    if (!work) return;
+
+    if (!work.category) {
+      showToast('还没选作品范围，先选一个再点完成更好（也可以直接完成）', true);
+    }
+
+    var maxOrder = state.works.reduce(function (max, item) {
+      if (!item || item.pending) return max;
+      return Math.max(max, Number.isFinite(item.order) ? item.order : -1);
+    }, -1);
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = '保存中';
+    }
+    markSelfWrite();
+
+    Store.updateWork(id, { pending: 0, order: maxOrder + 1 })
+      .then(function (updated) {
+        work.pending = 0;
+        work.order = Number.isFinite(updated && updated.order) ? updated.order : maxOrder + 1;
+        var idx = state.works.indexOf(work);
+        if (idx >= 0) {
+          state.works.splice(idx, 1);
+          state.works.push(work);
+        }
+        renderWorks();
+        showToast('已排到列表末尾，可以继续调顺序');
+      })
+      .catch(function (error) {
+        if (button) {
+          button.disabled = false;
+          button.textContent = '完成';
+        }
+        showToast(error && error.message ? error.message : '保存失败，请重试', true);
       });
   }
 
@@ -1687,10 +1794,25 @@
 
     if (els.worksEmpty) els.worksEmpty.hidden = true;
 
+    /* 分成两组：待完善（刚导入、资料没填）和正式作品。
+       待完善的排在最上面单独一块，不参与正式排序；
+       点「完成」后 pending 清掉，才真正排到末尾。 */
+    var pendingWorks = [];
+    var doneWorks = [];
+    state.works.forEach(function (work) {
+      if (work && work.pending) pendingWorks.push(work);
+      else doneWorks.push(work);
+    });
+
     // 首次渲染让全部卡片依次入场；之后只有新上传的作品入场。
     var entering = 0;
     var fragment = document.createDocumentFragment();
-    state.works.forEach(function (work, index) {
+
+    if (pendingWorks.length) {
+      fragment.appendChild(createPendingSection(pendingWorks));
+    }
+
+    doneWorks.forEach(function (work, index) {
       var isFresh = !state.rendered || state.freshIds.indexOf(work.id) !== -1;
       fragment.appendChild(createWorkEditor(work, index, isFresh ? entering : -1));
       if (isFresh) entering += 1;
@@ -2300,7 +2422,9 @@
     /* 云端模式一次并发传 3 张：每张要经历「压缩 → 传图 → 写数据」，
        串行传 5 张要等半分钟；并发 3 路能把总时间压到 1/3 左右。
        不并发更多是因为手机上传带宽有限，再多反而互相抢。 */
-    var CONCURRENCY = cloud ? 3 : 1;
+      /* 一次只压一张：canvas 编码是 CPU 密集的，三张同时压会把主线程占满，
+         表现就是「上传时界面卡住」。串行压缩 + 每张压完立刻刷新，反而更顺。 */
+      var CONCURRENCY = 1;
 
     updateProgress(0, total, '准备上传…');
 
@@ -2323,11 +2447,19 @@
           thumbBlob: derivatives.thumbBlob,
           displayType: derivatives.displayType,
           thumbType: derivatives.thumbType,
-          order: nextOrder + index,
+          pending: 1,
+          order: -1000 + index,
           createdAt: Date.now()
         };
         await Store.addWork(record);
         created += 1;
+        /* 每完成一张就刷新一下列表：用户能立刻看到作品出现，
+           不用等全部传完（以前要等整批结束才刷，感觉像卡住了）。 */
+        try {
+          await loadWorks();
+        } catch (refreshError) {
+          /* 刷新失败不影响上传本身 */
+        }
         freshIds.push(record.id);
       } catch (error) {
         var message = error && error.message ? error.message : '处理失败';
