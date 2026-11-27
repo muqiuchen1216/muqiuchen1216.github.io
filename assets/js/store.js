@@ -48,7 +48,10 @@
   var PROFILE_STAMP_KEY = 'quiet-light.profile.updated';
   var MAX_FILE_BYTES = 60 * 1024 * 1024;
   var DISPLAY_EDGE = 2600;
-  var THUMB_EDGE = 1400;
+  /* 缩略图长边。原来 1400px 太大：工作室列表里只显示约 90px 宽，
+     首页卡片也就几百 px，1400 属于白白多传几百 KB。
+     900px 在 3 倍屏上看依然清晰，体积大约只有三分之一。 */
+  var THUMB_EDGE = 900;
 
   var API_BASE = '/__muqiuchen__/api';
   var JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -1547,11 +1550,22 @@
 
     var displayCanvas = null;
     try {
-      // 缩略图直接基于已缩好的显示图再缩一次：从原始大图（常见 24MP）
-      // 再重采样一遍既慢、画质也没有收益，而上传时的卡顿主要来自这里。
+      /* 缩略图直接基于已缩好的显示图再缩一次：从原始大图（常见 24MP）
+         再重采样一遍既慢、画质也没有收益，而上传时的卡顿主要来自这里。
+         两张图**同时编码**：encodeCanvas / resizeImage 都是异步的，
+         串行要等两趟，并行只等最慢的那一趟。 */
       displayCanvas = drawToCanvas(decoded.image, width, height, DISPLAY_EDGE);
-      displayBlob = await encodeCanvas(displayCanvas, 0.9);
-      thumbBlob = await resizeImage(displayCanvas, displayCanvas.width, displayCanvas.height, THUMB_EDGE, 0.82);
+      var thumbPromise = resizeImage(
+        displayCanvas,
+        displayCanvas.width,
+        displayCanvas.height,
+        THUMB_EDGE,
+        0.82
+      );
+      var displayPromise = encodeCanvas(displayCanvas, 0.9);
+      var results = await Promise.all([displayPromise, thumbPromise]);
+      displayBlob = results[0];
+      thumbBlob = results[1];
       releaseCanvas(displayCanvas);
       displayCanvas = null;
     } catch (error) {

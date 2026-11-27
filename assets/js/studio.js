@@ -128,6 +128,17 @@
     }
   }
 
+  /* 把数据里的图片地址转成浏览器能直接用的地址。
+     数据里存的是 `media/x.webp`（相对站点根，兼容用户名.github.io 这类子目录部署），
+     但 studio.html 在根目录，相对路径会解析错。这里统一补成站点根相对路径。 */
+  function mediaSrc(url) {
+    var value = String(url || '');
+    if (!value) return '';
+    if (/^(data:|blob:|https?:)/i.test(value)) return value;
+    if (value.charAt(0) === '/') return value;
+    return '/' + value.replace(/^\.\//, '');
+  }
+
   function isServerMode() {
     return Boolean(Store && typeof Store.getMode === 'function' && Store.getMode() === 'server');
   }
@@ -1257,8 +1268,12 @@
     var thumbUrl = '';
     try {
       if (work.remote) {
-        // 服务器上的作品直接用它的图片地址，不需要 objectURL。
-        thumbUrl = work.thumbUrl || work.displayUrl || '';
+        /* 服务器 / 云端返回的图片地址。store.js 为了兼容子目录部署，
+           会把 `/media/x.webp` 去掉开头斜杠变成 `media/x.webp`；
+           但工作室页面本身在 /studio.html，相对路径会被解析成
+           /studio.html/media/x.webp → 404 → 缩略图白板。
+           这里补回站点根，让它始终指向真正的图片。 */
+        thumbUrl = mediaSrc(work.thumbUrl || work.displayUrl || '');
       } else {
         thumbUrl = state.thumbUrls.get(work.id) || '';
         if (!thumbUrl) {
@@ -1726,10 +1741,21 @@
         否则指针停在两格交界处会来回插拔，每次都触发整列表重排。 */
 
   var DRAG_HOLD_MS = 320; /* 按住多久算长按 */
-  var DRAG_SLOP = 8; /* 长按成立前允许的抖动，超过就当普通点击/滚动 */
+  /* 长按成立前允许的抖动。手机上手指按下去几乎不可能完全不动，
+     触点本身也有 1~2px 的抖动，原来 8px 太严 ——
+     结果是一按就开始滚屏、长按永远不成立，看着像「手机拖不动」。
+     桌面留 8px（鼠标很稳），触屏放宽到 16px。 */
+  var DRAG_SLOP = 8;
+  var DRAG_SLOP_TOUCH = 16;
   var DRAG_EDGE = 96; /* 进入视口上下这个范围开始自动滚动 */
   var DRAG_MAX_STEP = 20; /* 自动滚动最快每帧多少像素 */
   var DRAG_HYSTERESIS = 16; /* 越过中线这么多像素才换位，防止边界来回抖 */
+
+  /* 触屏判定：pointerType 在部分老浏览器里是空的，用能力兜底。 */
+  function isTouchPointer(event) {
+    if (event && event.pointerType) return event.pointerType === 'touch' || event.pointerType === 'pen';
+    return typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+  }
 
   var dragState = { pending: null, active: null, suppressClickUntil: 0, savedScrollBehavior: '' };
 
@@ -1772,6 +1798,7 @@
       card: card,
       startX: event.clientX,
       startY: event.clientY,
+      touch: isTouchPointer(event),
       timer: 0
     };
     pending.timer = window.setTimeout(function () {
@@ -1783,9 +1810,11 @@
   function onDragPointerMove(event) {
     var pending = dragState.pending;
     if (pending && event.pointerId === pending.pointerId) {
+      /* 触屏用更宽松的阈值：手指的天然抖动不该被当成「我要滚动页面」。 */
+      var slop = pending.touch ? DRAG_SLOP_TOUCH : DRAG_SLOP;
       if (
-        Math.abs(event.clientX - pending.startX) > DRAG_SLOP ||
-        Math.abs(event.clientY - pending.startY) > DRAG_SLOP
+        Math.abs(event.clientX - pending.startX) > slop ||
+        Math.abs(event.clientY - pending.startY) > slop
       ) {
         /* 长按还没成立指针就动了：这是普通点击或滚动，别抢 */
         clearPendingDrag();

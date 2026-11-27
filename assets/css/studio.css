@@ -2391,3 +2391,40 @@ body.is-dragging-work .work-editor {
     flex: 1 1 100%;
   }
 }
+
+/* =========================================================
+   手机上能拖动排序
+   ---------------------------------------------------------
+   之前手机拖不动，根因是浏览器把「长按后滑动」当成了页面滚动，
+   手势被滚动接管，pointermove 根本收不到后续事件。
+   touch-action: pan-y 的意思是：纵向滚动仍归浏览器（不然页面滑不动），
+   但长按拖动期间的横向判定交给脚本。再配合下面的 user-select 一起用。
+   ========================================================= */
+
+.works-list {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 卡片本身也不允许被选中/长按弹出菜单，否则会打断长按拖动 */
+.work-editor {
+  -webkit-touch-callout: none;
+}
+
+/* 正在拖动时：彻底关掉滚动，避免和自动滚动打架 */
+body.is-dragging-work {
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+body.is-dragging-work .works-list {
+  touch-action: none;
+}
+
+/* 拖动中的卡片：抬起来的感觉更明确，手指不会怀疑没抓住 */
+.work-editor.is-dragging {
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55);
+  cursor: grabbing;
+}

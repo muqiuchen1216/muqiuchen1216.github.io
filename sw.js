@@ -12,7 +12,7 @@
 
 /* 改动缓存策略时把这个版本号 +1：activate 会把旧版本缓存全部删掉，
    避免用户手里留着上一版的行为。 */
-var VERSION = 'muq-v7';
+var VERSION = 'muq-v8';
 var SHELL_CACHE = VERSION + '-shell';
 var MEDIA_CACHE = VERSION + '-media';
 
