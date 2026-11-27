@@ -1265,6 +1265,22 @@
     /* 缩略图 */
     var thumb = document.createElement('div');
     thumb.className = 'work-editor__thumb';
+
+    /* 拖动把手：手机上最可靠的入口。
+       手指按在把手上时，浏览器不会把它当成「想滚动页面」，
+       所以长按一定能成立；按在别处仍然走「长按 0.3 秒」的老路径。 */
+    var handle = document.createElement('button');
+    handle.type = 'button';
+    handle.className = 'work-editor__handle';
+    handle.setAttribute('data-drag-handle', 'true');
+    handle.setAttribute('aria-label', '按住拖动调整顺序');
+    handle.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle>' +
+      '<circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle>' +
+      '<circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle>' +
+      '</svg>';
+    thumb.appendChild(handle);
     var thumbUrl = '';
     try {
       if (work.remote) {
@@ -1763,7 +1779,15 @@
      否则想点按钮或者定位光标时会误触发拖拽。 */
   function isDragSource(node) {
     if (!node || !node.closest) return false;
+    /* 拖动把手永远可以拖，即使它在按钮里 */
+    if (node.closest('[data-drag-handle]')) return true;
     return !node.closest('button, a, input, select, textarea, label, [contenteditable="true"]');
+  }
+
+  /* 按在把手上：不用等长按，立刻开始拖。
+     这是手机上的主力路径 —— 手指在把手上滑动，浏览器不会当成滚动。 */
+  function isDragHandle(node) {
+    return Boolean(node && node.closest && node.closest('[data-drag-handle]'));
   }
 
   function cardFromNode(node) {
@@ -1786,12 +1810,24 @@
   }
 
   function onDragPointerDown(event) {
-    if (event.button && event.button !== 0) return; /* 只认左键 */
+    if (event.button && event.button !== 0) return; /* 只认左键（触摸时是 0） */
     if (dragState.pending || dragState.active) return;
     if (state.ordering || state.busy || state.deleting) return;
     if (!isDragSource(event.target)) return;
     var card = cardFromNode(event.target);
     if (!card) return;
+
+    /* 触屏：长按期间浏览器随时可能因为「这是滑动」而发 pointercancel，
+       一旦取消，后面的 move 全收不到 —— 这就是手机上拖不动的根本原因。
+       这里在按下时就阻止默认行为（配合 CSS 的 touch-action: none），
+       让浏览器把这段手势完全交给我们处理。 */
+    if (isTouchPointer(event)) {
+      try {
+        event.preventDefault();
+      } catch (error) {
+        /* 被动监听时无法阻止，交给下面的兜底 */
+      }
+    }
 
     var pending = {
       pointerId: event.pointerId,
@@ -1801,6 +1837,20 @@
       touch: isTouchPointer(event),
       timer: 0
     };
+
+    /* 按在拖动把手上、或者用的是鼠标：不需要长按，直接开始拖。
+       只有「手指按在卡片其它地方」才需要长按 0.3 秒，
+       这样普通滑动滚动页面不受影响。 */
+    var instant = isDragHandle(event.target) || !isTouchPointer(event);
+    if (instant) {
+      /* 必须先挂到 dragState.pending 上再调 startDrag ——
+         startDrag 开头会校验 dragState.pending === pending，
+         不挂就等于自己把自己拦掉了（手机拖不动就是这里）。 */
+      dragState.pending = pending;
+      startDrag(pending);
+      return;
+    }
+
     pending.timer = window.setTimeout(function () {
       startDrag(pending);
     }, DRAG_HOLD_MS);
@@ -2069,7 +2119,10 @@
 
   function setupWorkDragging() {
     if (!els.worksList || !window.PointerEvent) return;
-    els.worksList.addEventListener('pointerdown', onDragPointerDown);
+    /* 关键：passive: false。浏览器的 pointer/touch 监听默认是「被动」的，
+       被动监听里调 preventDefault() 会被忽略 —— 那就拦不住浏览器的滚动接管，
+       手势依然会被 cancel，手机上依然拖不动。 */
+    els.worksList.addEventListener('pointerdown', onDragPointerDown, { passive: false });
     /* move / up 挂在 window 上：指针滑出列表甚至滑出窗口也收得到 */
     window.addEventListener('pointermove', onDragPointerMove, true);
     window.addEventListener('pointerup', function (event) {
@@ -2093,6 +2146,15 @@
     els.worksList.addEventListener('contextmenu', function (event) {
       if (dragState.active) event.preventDefault();
     });
+    /* 保险：一旦进入拖动，拦住 touchmove 的默认滚动（有些安卓 WebView
+       只认 touch 事件，不认 pointer 的 preventDefault）。 */
+    els.worksList.addEventListener(
+      'touchmove',
+      function (event) {
+        if (dragState.active && event.cancelable) event.preventDefault();
+      },
+      { passive: false }
+    );
   }
 
   async function deleteWorkItem(id) {

@@ -2401,11 +2401,12 @@ body.is-dragging-work .work-editor {
    但长按拖动期间的横向判定交给脚本。再配合下面的 user-select 一起用。
    ========================================================= */
 
+/* 列表本身允许纵向滚动（否则页面滑不动）。
+   长按拖动期间的拦截由 JS 的 preventDefault 负责，
+   不能在这里写 touch-action: none —— 那会让整页无法滚动。 */
 .works-list {
-  touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
-  -webkit-touch-callout: none;
 }
 
 /* 卡片本身也不允许被选中/长按弹出菜单，否则会打断长按拖动 */
@@ -2427,4 +2428,80 @@ body.is-dragging-work .works-list {
 .work-editor.is-dragging {
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55);
   cursor: grabbing;
+}
+
+/* =========================================================
+   拖动把手（手机主力入口）
+   ---------------------------------------------------------
+   手机上「长按卡片再拖」容易被浏览器判定成滚动而取消，
+   所以给每张卡片加一个明确的把手：按住它就直接拖，不用等长按。
+   把手上的 touch-action: none 是关键 —— 浏览器在这里完全放手，
+   手势一定交给脚本。
+   ========================================================= */
+
+.work-editor__handle {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(10, 11, 13, 0.62);
+  color: rgba(240, 237, 231, 0.82);
+  cursor: grab;
+  /* 关键：这里完全接管手势，浏览器不再把滑动当成滚动 */
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+.work-editor__handle svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+.work-editor__handle:hover {
+  background: rgba(200, 168, 107, 0.9);
+  color: #14161a;
+}
+
+.work-editor__handle:active {
+  cursor: grabbing;
+  background: rgba(200, 168, 107, 1);
+  color: #14161a;
+}
+
+/* 手机上把把手做得更大更好点 */
+@media (pointer: coarse) {
+  .work-editor__handle {
+    width: 40px;
+    height: 40px;
+    background: rgba(10, 11, 13, 0.75);
+    border: 1px solid rgba(200, 168, 107, 0.45);
+    color: #e8cf9a;
+  }
+
+  .work-editor__handle svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* 拖动时把手高亮，让人确认抓到了 */
+.work-editor.is-dragging .work-editor__handle {
+  background: rgba(200, 168, 107, 1);
+  color: #14161a;
+}
+
+/* 缩略图容器需要 relative 定位给把手当参照 */
+.work-editor__thumb {
+  position: relative;
 }
