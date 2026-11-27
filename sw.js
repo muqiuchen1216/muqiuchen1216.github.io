@@ -10,7 +10,9 @@
      这是唯一会变的内容，必须拿到最新的。
    ========================================================= */
 
-var VERSION = 'muq-v1';
+/* 改动缓存策略时把这个版本号 +1：activate 会把旧版本缓存全部删掉，
+   避免用户手里留着上一版的行为。 */
+var VERSION = 'muq-v2';
 var SHELL_CACHE = VERSION + '-shell';
 var MEDIA_CACHE = VERSION + '-media';
 
@@ -39,14 +41,20 @@ self.addEventListener('install', function (event) {
     caches
       .open(SHELL_CACHE)
       .then(function (cache) {
-        // 单个文件失败不该让整次安装失败（比如某个图标暂时 404）。
-        return Promise.all(
-          SHELL_FILES.map(function (file) {
+        /* 一个个来，不要 Promise.all 并发。
+           这条线路到 GitHub Pages 只有约 70 KB/s，十几个文件同时抓会把带宽切碎，
+           首屏图片排在它们后面，结果就是「页面打开很久还是一堆灰框」。
+           串行预缓存对首屏几乎无感（只是把 16 个请求摊开），但图片能先出来。 */
+        var chain = Promise.resolve();
+        SHELL_FILES.forEach(function (file) {
+          chain = chain.then(function () {
             return cache.add(new Request(file, { cache: 'reload' })).catch(function () {
+              /* 单个文件失败不该让整次安装失败 */
               return null;
             });
-          })
-        );
+          });
+        });
+        return chain;
       })
       .then(function () {
         return self.skipWaiting();

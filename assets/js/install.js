@@ -38,11 +38,17 @@
   });
 
   window.addEventListener('load', function () {
-    navigator.serviceWorker
-      .register('sw.js', { scope: './' })
-      .catch(function () {
-        /* 注册失败不影响正常浏览，只是没有离线能力 */
-      });
+    /* 等页面 load 之后再等 3 秒才注册 SW。
+       原因：SW 安装时要预缓存十几个外壳文件，而这条线路到 GitHub Pages
+       只有约 70 KB/s —— 一装上就抢带宽，首屏那两张图会被挤到后面，
+       用户看到的是一堆灰框。等首屏安静下来再装，体验明显更顺。 */
+    window.setTimeout(function () {
+      navigator.serviceWorker
+        .register('sw.js', { scope: './' })
+        .catch(function () {
+          /* 注册失败不影响正常浏览，只是没有离线能力 */
+        });
+    }, 3000);
   });
 
   /* 给页面上的按钮用：window.PortfolioInstall.prompt() */

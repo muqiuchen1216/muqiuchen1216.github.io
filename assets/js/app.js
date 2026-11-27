@@ -848,7 +848,11 @@
     image.alt = work.title + (work.location ? '，' + work.location : '');
     image.width = work.width;
     image.height = work.height;
-    image.loading = index < 3 ? 'eager' : 'lazy';
+    /* 首屏只抢前 2 张，其余全部懒加载。
+       国内到 GitHub Pages 的图片带宽实测约 70 KB/s，一张缩略图要 3~6 秒，
+       同时发 16 个请求会把带宽切碎、谁都出不来；少而有序反而更快看到图。 */
+    image.loading = index < 2 ? 'eager' : 'lazy';
+    if (index === 0) image.setAttribute('fetchpriority', 'high');
     image.decoding = 'async';
 
     var arrow = document.createElement('span');
