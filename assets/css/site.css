@@ -2572,3 +2572,21 @@ html {
   }
 }
 
+
+/* 页脚的「装到手机主屏」入口 */
+.site-footer__install {
+  margin: 10px 0 0;
+  font-size: 12px;
+}
+
+.site-footer__install a {
+  color: rgba(200, 168, 107, 0.75);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(200, 168, 107, 0.3);
+  padding-bottom: 1px;
+}
+
+.site-footer__install a:hover {
+  color: #c8a86b;
+  border-bottom-color: rgba(200, 168, 107, 0.7);
+}

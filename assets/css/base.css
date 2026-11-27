@@ -379,3 +379,65 @@ ol {
     min-height: 46px;
   }
 }
+
+/* ---------- 「装到主屏」浮动按钮 ---------- */
+/* 手机版 Chrome 不一定在菜单里给「安装应用」，
+   这个按钮让网页自己触发安装弹窗，是站内唯一的可靠入口。 */
+.install-fab {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 20px;
+  border: 1px solid rgba(200, 168, 107, 0.55);
+  border-radius: 999px;
+  background: rgba(20, 22, 26, 0.94);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #f0ede7;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  animation: install-fab-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.install-fab[hidden] {
+  display: none;
+}
+
+.install-fab:hover {
+  border-color: rgba(200, 168, 107, 0.9);
+  background: rgba(28, 31, 37, 0.96);
+}
+
+.install-fab:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.install-fab span[aria-hidden] {
+  color: #c8a86b;
+  font-size: 14px;
+}
+
+@keyframes install-fab-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .install-fab {
+    animation: none;
+  }
+}

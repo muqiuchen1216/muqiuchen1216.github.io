@@ -20,12 +20,62 @@
   if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
 
   var deferredPrompt = null;
+  var installButton = null;
+
+  /* 把「装到主屏」做成页面上一个真按钮。
+     手机版 Chrome 默认不一定在菜单里给「安装应用」，
+     但网页自己可以触发安装弹窗 —— 这是我们能提供的最可靠的入口。 */
+  function ensureButton() {
+    if (installButton) return installButton;
+    if (!document.body) return null;
+
+    installButton = document.createElement('button');
+    installButton.type = 'button';
+    installButton.id = 'installFab';
+    installButton.className = 'install-fab';
+    installButton.innerHTML = '<span aria-hidden="true">⬇</span> 装到主屏';
+    installButton.title = '把「光与影」装到手机主屏，像 APP 一样打开';
+    installButton.addEventListener('click', function () {
+      if (!deferredPrompt) {
+        // 拿不到安装事件时的兜底说明
+        window.alert(
+          '这个浏览器没有提供安装弹窗。\n\n' +
+          '手动装：点浏览器右上角 ⋮ → 找到「添加到主屏幕」或「安装应用」。\n' +
+          '小米手机用 Chrome 时，如果菜单里没有这一项，可以改用系统自带浏览器打开同一网址再试。'
+        );
+        return;
+      }
+      var event = deferredPrompt;
+      deferredPrompt = null;
+      hideButton();
+      event.prompt();
+      event.userChoice.then(function (choice) {
+        if (choice && choice.outcome === 'accepted') {
+          hideButton();
+        } else {
+          showButton();
+        }
+      });
+    });
+    document.body.appendChild(installButton);
+    return installButton;
+  }
+
+  function showButton() {
+    var button = ensureButton();
+    if (button) button.hidden = false;
+  }
+
+  function hideButton() {
+    if (installButton) installButton.hidden = true;
+  }
 
   window.addEventListener('beforeinstallprompt', function (event) {
     // 拦一下浏览器的默认横条，改成站内自己的按钮，样式统一。
     event.preventDefault();
     deferredPrompt = event;
     document.documentElement.setAttribute('data-can-install', 'true');
+    showButton();
     var button = document.getElementById('installApp');
     if (button) button.hidden = false;
   });
@@ -33,9 +83,15 @@
   window.addEventListener('appinstalled', function () {
     deferredPrompt = null;
     document.documentElement.removeAttribute('data-can-install');
+    hideButton();
     var button = document.getElementById('installApp');
     if (button) button.hidden = true;
   });
+
+  /* 已经装过（独立窗口打开）就别再显示安装按钮。 */
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+    hideButton();
+  }
 
   window.addEventListener('load', function () {
     /* 等页面 load 之后再等 3 秒才注册 SW。
@@ -64,6 +120,7 @@
       return event.userChoice.then(function (choice) {
         return choice && choice.outcome ? choice.outcome : 'dismissed';
       });
-    }
+    },
+    show: showButton
   };
 })();

@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0b0d">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex, nofollow">
+  <title>装到主屏 — 光与影</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    body.install-page {
+      margin: 0;
+      min-height: 100vh;
+      background: #0a0b0d;
+      color: #f0ede7;
+      font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif;
+      line-height: 1.7;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .ip-wrap {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: clamp(28px, 7vw, 56px) 22px calc(48px + env(safe-area-inset-bottom));
+    }
+
+    .ip-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      display: block;
+      margin: 0 auto 22px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .ip-title {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 7vw, 34px);
+      line-height: 1.25;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    .ip-sub {
+      margin: 0 0 30px;
+      text-align: center;
+      font-size: 14px;
+      color: rgba(240, 237, 231, 0.62);
+    }
+
+    .ip-primary {
+      display: block;
+      width: 100%;
+      padding: 16px 20px;
+      border: 1px solid rgba(200, 168, 107, 0.6);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #c8a86b, #b08f52);
+      color: #14161a;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 8px 26px rgba(200, 168, 107, 0.24);
+    }
+
+    .ip-primary:active {
+      transform: scale(0.985);
+    }
+
+    .ip-primary[hidden] {
+      display: none;
+    }
+
+    .ip-state {
+      margin: 14px 0 0;
+      text-align: center;
+      font-size: 12.5px;
+      color: rgba(240, 237, 231, 0.5);
+      min-height: 20px;
+    }
+
+    .ip-hint {
+      margin: 26px 0 0;
+      padding: 14px 16px;
+      border-left: 2px solid rgba(200, 168, 107, 0.6);
+      background: rgba(200, 168, 107, 0.07);
+      border-radius: 0 10px 10px 0;
+      font-size: 13px;
+      color: rgba(240, 237, 231, 0.8);
+    }
+
+    .ip-hint[hidden] {
+      display: none;
+    }
+
+    .ip-section {
+      margin-top: 34px;
+      padding-top: 26px;
+      border-top: 1px solid rgba(240, 237, 231, 0.1);
+    }
+
+    .ip-section h2 {
+      margin: 0 0 14px;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      color: rgba(200, 168, 107, 0.9);
+      font-weight: 600;
+    }
+
+    .ip-steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .ip-steps li {
+      position: relative;
+      padding-left: 38px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: rgba(240, 237, 231, 0.86);
+      counter-increment: step;
+    }
+
+    .ip-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(200, 168, 107, 0.5);
+      color: #c8a86b;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ip-steps b {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .ip-steps .ip-note {
+      display: block;
+      margin-top: 4px;
+      font-size: 12.5px;
+      color: rgba(240, 237, 231, 0.5);
+    }
+
+    .ip-back {
+      display: block;
+      margin-top: 34px;
+      text-align: center;
+      font-size: 13px;
+      color: rgba(240, 237, 231, 0.55);
+      text-decoration: none;
+    }
+
+    .ip-back:hover {
+      color: #c8a86b;
+    }
+
+    .ip-detect {
+      margin: 0 0 18px;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(240, 237, 231, 0.42);
+    }
+  </style>
+</head>
+<body class="install-page">
+  <main class="ip-wrap">
+    <img class="ip-icon" src="assets/img/icon-192.png" alt="" width="88" height="88">
+    <h1 class="ip-title">装到主屏</h1>
+    <p class="ip-sub">装好后从桌面图标点进去，全屏打开，没有地址栏。</p>
+
+    <p class="ip-detect" id="ipDetect"></p>
+
+    <button class="ip-primary" type="button" id="ipButton" hidden>立即安装</button>
+    <p class="ip-state" id="ipState">正在检查这个浏览器能不能直接安装…</p>
+
+    <p class="ip-hint" id="ipHint" hidden></p>
+
+    <section class="ip-section" id="ipManual">
+      <h2>手动安装（各浏览器）</h2>
+      <ol class="ip-steps" id="ipManualSteps"></ol>
+    </section>
+
+    <a class="ip-back" href="index.html">← 先看看作品</a>
+  </main>
+
+  <script src="assets/js/install.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var ua = navigator.userAgent || '';
+      var isAndroid = /Android/i.test(ua);
+      var isIOS = /iPhone|iPad|iPod/i.test(ua);
+      var isWeChat = /MicroMessenger/i.test(ua);
+      var isQQ = /\sQQ/i.test(ua) || /QQBrowser/i.test(ua);
+      var isXiaomi = /MiuiBrowser|XiaoMi/i.test(ua);
+      var isChrome = /Chrome\//.test(ua) && !/Edg\//.test(ua) && !/OPR\//.test(ua);
+      var isEdge = /Edg\//.test(ua);
+      var isSamsung = /SamsungBrowser/i.test(ua);
+
+      var button = document.getElementById('ipButton');
+      var state = document.getElementById('ipState');
+      var hint = document.getElementById('ipHint');
+      var detect = document.getElementById('ipDetect');
+      var steps = document.getElementById('ipManualSteps');
+
+      function setName(text) {
+        if (detect) detect.textContent = text;
+      }
+
+      if (isWeChat) setName('当前在微信里打开 —— 微信不支持安装');
+      else if (isXiaomi) setName('当前是小米浏览器');
+      else if (isEdge) setName('当前是 Edge 浏览器');
+      else if (isSamsung) setName('当前是三星浏览器');
+      else if (isChrome) setName('当前是 Chrome 浏览器');
+      else if (isIOS) setName('当前是 iPhone / iPad');
+      else if (isAndroid) setName('当前是安卓浏览器');
+      else setName('当前在电脑浏览器');
+
+      // 微信 / QQ 内置浏览器：安装不工作，先给跳转提示
+      if (isWeChat) {
+        state.textContent = '微信内置浏览器装不了，需要用系统浏览器打开。';
+        hint.hidden = false;
+        hint.innerHTML =
+          '点右上角 <b>···</b> → <b>在浏览器中打开</b>，然后再回到这个页面。' +
+          '<br>或者复制这个网址，粘贴到 Chrome 里：' +
+          '<br><b>muqiuchen1216.github.io</b>';
+      }
+
+      // 安装按钮
+      function refreshButton() {
+        if (!window.PortfolioInstall) return;
+        if (window.PortfolioInstall.available() && !isWeChat) {
+          button.hidden = false;
+          state.textContent = '';
+          hint.hidden = true;
+        } else if (!isWeChat) {
+          button.hidden = true;
+          state.textContent =
+            isChrome && isAndroid
+              ? '这个 Chrome 没有提供自动安装，用下面的手动步骤（一样的效果）。'
+              : '用下面的手动步骤即可。';
+        }
+      }
+
+      button.addEventListener('click', function () {
+        window.PortfolioInstall.prompt().then(function (outcome) {
+          if (outcome === 'accepted') {
+            state.textContent = '已装好，回桌面看看新图标吧。';
+            button.hidden = true;
+          } else if (outcome === 'unavailable') {
+            state.textContent = '这个浏览器不支持自动安装，用下面的步骤。';
+          }
+        });
+      });
+
+      // 手动步骤按浏览器区分
+      var list = [];
+      if (isIOS) {
+        list = [
+          '用 <b>Safari</b> 打开这个网址（必须是 Safari）。',
+          '点底部中间的 <b>分享</b> 按钮（方框带向上箭头）。',
+          '往下找到 <b>添加到主屏幕</b>，点它，再点 <b>添加</b>。',
+        ];
+      } else if (isEdge) {
+        list = [
+          '点右上角 <b>···</b> 打开菜单。',
+          '找到 <b>添加到手机</b> 或 <b>安装此站点为应用</b>。',
+          '确认 <b>安装</b>。',
+        ];
+      } else if (isXiaomi) {
+        list = [
+          '点底部中间的 <b>≡</b> 菜单按钮。',
+          '找到 <b>添加到桌面</b>（有的版本在「更多」里）。',
+          '点它，桌面上就会出现图标。',
+          '<b>如果找不到</b>：换用 Chrome 打开同一网址，Chrome 的成功率更高。',
+        ];
+      } else {
+        list = [
+          '点右上角 <b>⋮</b> 打开菜单。',
+          '找到 <b>添加到主屏幕</b> 或 <b>安装应用</b>（名字因版本而异）。',
+          '点它，再确认 <b>添加</b>。',
+          '<b>如果菜单里没有这一项</b>：说明这个版本的 Chrome 没开放安装入口。' +
+            '换用手机系统自带浏览器（小米浏览器、三星浏览器等）打开同一网址，一般都能装。',
+        ];
+      }
+      list.forEach(function (html) {
+        var li = document.createElement('li');
+        li.innerHTML = html;
+        steps.appendChild(li);
+      });
+
+      // 已安装（独立窗口）就提示一下
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        state.textContent = '你现在就是从主屏图标打开的 —— 已经装好了。';
+        button.hidden = true;
+        hint.hidden = true;
+      }
+
+      window.addEventListener('beforeinstallprompt', function () {
+        setTimeout(refreshButton, 50);
+      });
+      window.addEventListener('appinstalled', function () {
+        state.textContent = '已装好，回桌面看看新图标吧。';
+        button.hidden = true;
+      });
+
+      setTimeout(refreshButton, 600);
+      setTimeout(refreshButton, 2500);
+    })();
+  </script>
+</body>
+</html>

@@ -12,7 +12,7 @@
 
 /* 改动缓存策略时把这个版本号 +1：activate 会把旧版本缓存全部删掉，
    避免用户手里留着上一版的行为。 */
-var VERSION = 'muq-v2';
+var VERSION = 'muq-v3';
 var SHELL_CACHE = VERSION + '-shell';
 var MEDIA_CACHE = VERSION + '-media';
 
@@ -21,6 +21,7 @@ var SHELL_FILES = [
   './',
   'index.html',
   'studio.html',
+  'install.html',
   'manifest.webmanifest',
   'assets/css/base.css',
   'assets/css/site.css',
