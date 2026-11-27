@@ -2362,13 +2362,14 @@
 
     /* 生成令牌的链接带上预填参数：GitHub 支持 name / expires_in / 描述，
        打开后名字和有效期已经填好，用户只要选仓库、勾权限。
-       （GitHub 不允许通过 URL 预选仓库和权限，这两步仍要手点。） */
+       （GitHub 不允许通过 URL 预选仓库和权限，这两步仍要手点。）
+       expires_in 留空 = No expiration（永不过期）。 */
     var genLink = document.getElementById('tokenGenerateLink');
     if (genLink) {
       var params = [
         'name=' + encodeURIComponent('muqiuchen-shouji'),
         'description=' + encodeURIComponent('手机上改作品集'),
-        'expires_in=' + encodeURIComponent('365')
+        'expires_in='
       ];
       genLink.href = 'https://github.com/settings/personal-access-tokens/new?' + params.join('&');
     }
