@@ -230,10 +230,35 @@
 
           <ul class="contact__cards" id="contactCards" data-reveal style="--reveal-delay: 150ms"></ul>
 
+          <!-- 站长入口：装成 APP 后最需要的两个动作，放在联系区下面，不用回头找顶栏 -->
+          <section class="owner-dock" data-reveal aria-label="站长工具">
+            <p class="owner-dock__label">站长入口</p>
+            <div class="owner-dock__row">
+              <a class="owner-dock__btn owner-dock__btn--primary" href="studio.html">
+                <span class="owner-dock__icon" aria-hidden="true">✎</span>
+                <span class="owner-dock__text">
+                  <b>进工作室</b>
+                  <small>改作品、改资料</small>
+                </span>
+              </a>
+              <a class="owner-dock__btn" href="install.html">
+                <span class="owner-dock__icon" aria-hidden="true">⬇</span>
+                <span class="owner-dock__text">
+                  <b>装到主屏</b>
+                  <small>像 APP 一样打开</small>
+                </span>
+              </a>
+            </div>
+          </section>
+
           <footer class="site-footer" data-reveal>
             <p>© <span id="footerYear">2026</span> <span data-profile="siteName">muqiuchen</span></p>
             <p class="site-footer__note">All photographs are protected by copyright.</p>
-            <p class="site-footer__install"><a href="install.html">装到手机主屏</a></p>
+            <div class="site-footer__admin">
+              <span class="site-footer__admin-label">站内</span>
+              <a href="studio.html">进工作室改作品 →</a>
+              <a href="install.html">装到手机主屏</a>
+            </div>
             <a class="back-top" href="#top">回到顶部 <span aria-hidden="true">↑</span></a>
           </footer>
         </div>

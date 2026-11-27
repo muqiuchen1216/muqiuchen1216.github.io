@@ -2590,3 +2590,158 @@ html {
   color: #c8a86b;
   border-bottom-color: rgba(200, 168, 107, 0.7);
 }
+
+/* =========================================================
+   工作室入口：手机上一定要好点
+   ---------------------------------------------------------
+   原来只有顶栏右上角一个小药丸，字号 9px —— 屏幕上跟装饰没区别，
+   站长自己也找不到入口。这里把它做成清晰可点的按钮，
+   并在页脚再放一个，滚到底也能进。
+   ========================================================= */
+
+/* 顶栏：给足点击区域和字号（触屏最小 44px 才舒服） */
+@media (max-width: 760px) {
+  .topbar__studio {
+    min-height: 38px;
+    padding: 9px 14px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200, 168, 107, 0.08);
+  }
+}
+
+@media (max-width: 360px) {
+  .topbar__studio {
+    padding: 8px 11px;
+    font-size: 11px;
+  }
+}
+
+/* 页脚：一个明显的区块，滚到底也能看到「进工作室」 */
+.site-footer__admin {
+  margin: 22px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.site-footer__admin-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted, rgba(240, 237, 231, 0.42));
+}
+
+.site-footer__admin a {
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(200, 168, 107, 0.35);
+  padding-bottom: 2px;
+}
+
+.site-footer__admin a:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* =========================================================
+   站长入口卡片（联系区下方）
+   装成 APP 后，站长最常做的是「进去改东西」，
+   不该让他翻到顶栏去找一个 9px 的小药丸。
+   ========================================================= */
+.owner-dock {
+  margin: clamp(32px, 6vw, 56px) 0 0;
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.022);
+}
+
+.owner-dock__label {
+  margin: 0 0 14px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.8;
+}
+
+.owner-dock__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.owner-dock__btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 13px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.22s ease, background 0.22s ease, transform 0.22s ease;
+}
+
+.owner-dock__btn:hover {
+  border-color: var(--accent);
+  background: rgba(200, 168, 107, 0.07);
+}
+
+.owner-dock__btn:active {
+  transform: scale(0.985);
+}
+
+.owner-dock__btn--primary {
+  border-color: rgba(200, 168, 107, 0.55);
+  background: rgba(200, 168, 107, 0.1);
+}
+
+.owner-dock__btn--primary:hover {
+  background: rgba(200, 168, 107, 0.17);
+}
+
+.owner-dock__icon {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(200, 168, 107, 0.14);
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.owner-dock__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.owner-dock__text b {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.owner-dock__text small {
+  font-size: 11.5px;
+  color: var(--muted, rgba(240, 237, 231, 0.5));
+  line-height: 1.3;
+}
+
+@media (max-width: 480px) {
+  .owner-dock__row {
+    grid-template-columns: 1fr;
+  }
+}

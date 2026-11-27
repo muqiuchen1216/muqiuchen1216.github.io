@@ -13,6 +13,9 @@
   "lang": "zh-CN",
   "dir": "ltr",
   "categories": ["photography", "portfolio", "productivity"],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
       "src": "assets/img/favicon.svg",
