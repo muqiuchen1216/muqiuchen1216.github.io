@@ -606,21 +606,26 @@
         });
       })
       .then(function (stale) {
+        /* 并行删除（最多 4 个同时）：串行删 4 张图要等 4 趟网络，并行只等 1 趟。 */
         var removed = 0;
-        var chain = Promise.resolve();
-        stale.forEach(function (item) {
-          chain = chain.then(function () {
-            return deleteFile(MEDIA_DIR + '/' + item.name, '清理旧图片').then(
+        var queue = stale.slice();
+        function worker() {
+          if (!queue.length) return Promise.resolve();
+          var item = queue.shift();
+          return deleteFile(MEDIA_DIR + '/' + item.name, '清理旧图片')
+            .then(
               function () {
                 removed += 1;
               },
               function () {
                 /* 单个文件删不掉不影响其它 */
               }
-            );
-          });
-        });
-        return chain.then(function () {
+            )
+            .then(worker);
+        }
+        var workers = [];
+        for (var w = 0; w < 4; w += 1) workers.push(worker());
+        return Promise.all(workers).then(function () {
           return removed;
         });
       })

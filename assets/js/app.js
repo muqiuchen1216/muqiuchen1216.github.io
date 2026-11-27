@@ -1099,7 +1099,12 @@
     var columns = width < 320 ? 1 : 2;
     var columnGap = width >= 1100 ? 28 : width >= 640 ? 16 : 8;
     var verticalGap = width >= 640 ? 38 : 20;
-    var captionHeight = width >= 980 ? 66 : width >= 640 ? 64 : 0;
+    /* 手机上也要显示标题。
+       以前这里是 `width < 640 ? 0`，标题高度算成 0，
+       再配合 CSS 的 .is-compact 把整块说明藏掉 ——
+       结果就是手机上只剩图片，没有任何作品名（站长自己都找不到）。
+       现在窄屏给一个紧凑高度，标题压缩成一行小字，但始终可见。 */
+    var captionHeight = width >= 980 ? 66 : width >= 640 ? 64 : 46;
     var columnWidth = (width - columnGap * (columns - 1)) / columns;
     var heights = [];
     var i;

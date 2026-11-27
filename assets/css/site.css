@@ -2123,13 +2123,51 @@ html {
   }
 }
 
-/* 说明栏是否显示，只由 app.js 的 layoutStream 根据「画廊实际宽度」
-   落下 .is-compact 类决定（画廊宽 = 视口 × 0.9，与视口断点对不齐：
-   画廊 640px 对应视口约 711px）。以前这里另写一条视口断点，
-   于是 684–710px 之间 CSS 认为该显示、JS 却把高度记成 0，
-   border-box + padding-top:11px 会把标题整段裁掉。 */
-.gallery.is-compact .work-entry__meta,
+/* 窄屏（手机）：说明栏仍然显示，只是压缩成紧凑一行。
+   以前这里是 `display: none` —— 手机上完全看不到作品名，
+   只能点开灯箱才知道这张叫什么，体验很差。
+   现在只把说明栏里「次要」的部分（序号圆环、比例标记）收起来，
+   标题和年份地点保留。 */
 .gallery.is-compact .work-entry__arrow {
+  display: none;
+}
+
+.gallery.is-compact .work-entry__meta {
+  display: flex;
+  padding-top: 7px;
+  padding-bottom: 4px;
+  gap: 6px;
+  align-items: baseline;
+}
+
+/* 紧凑模式下：序号缩小，标题一行截断，副标题更小 */
+.gallery.is-compact .work-entry__index {
+  font-size: 8px;
+  min-width: 16px;
+  opacity: 0.55;
+}
+
+.gallery.is-compact .work-entry__title {
+  font-size: 12.5px;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gallery.is-compact .work-entry__sub {
+  font-size: 9.5px;
+  line-height: 1.3;
+  margin-top: 2px;
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 紧凑模式下比例标记太挤，先不显示 */
+.gallery.is-compact .work-entry__ratio {
   display: none;
 }
 

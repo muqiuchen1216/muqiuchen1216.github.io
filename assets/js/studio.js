@@ -1259,11 +1259,27 @@
     title.className = 'pending-section__title';
     title.textContent = '待完善 ' + works.length + ' 件';
 
+    /* 一键完成：把所有待完善的都排到末尾，省得一个个点。
+       顺序按当前显示顺序（也就是上传顺序）。 */
+    var finishAll = document.createElement('button');
+    finishAll.type = 'button';
+    finishAll.className = 'pending-section__finish-all';
+    finishAll.textContent = '一键全部完成';
+    finishAll.addEventListener('click', function (event) {
+      event.preventDefault();
+      finishAllPendingWorks(finishAll);
+    });
+
+    var headRow = document.createElement('div');
+    headRow.className = 'pending-section__title-row';
+    headRow.appendChild(title);
+    headRow.appendChild(finishAll);
+
     var hint = document.createElement('p');
     hint.className = 'pending-section__hint';
-    hint.textContent = '填好作品范围和构图后，点「完成」就会排到下方正式列表的末尾。';
+    hint.textContent = '填好作品范围和构图后点「完成」；也可以先全部填完，再点右上角「一键全部完成」。';
 
-    head.appendChild(title);
+    head.appendChild(headRow);
     head.appendChild(hint);
     section.appendChild(head);
 
@@ -1537,6 +1553,72 @@
   /* 把「待完善」的作品转正：
      点「完成」时，给它一个真正排在末尾的序号，并清掉 pending。
      没填作品范围 / 构图也允许完成（不强求），但会顺手给个提醒。 */
+  /* 一键全部完成：把所有待完善的作品依次排到末尾。
+     一次只发一个请求（串行），避免并发写数据撞车。 */
+  function finishAllPendingWorks(button) {
+    var list = state.works.filter(function (work) {
+      return work && work.pending;
+    }).sort(function (a, b) {
+      /* 按上传顺序处理，保证排到末尾时顺序和上传一致。 */
+      /* 按上传先后排：pendingSeq 是上传时分配的递增号，
+         服务端重排 order 也不影响它。没记录的老数据退回用 order。 */
+      var sa = Number(a.pendingSeq) || 0;
+      var sb = Number(b.pendingSeq) || 0;
+      if (sa !== sb) return sa - sb;
+      return (Number(a.order) || 0) - (Number(b.order) || 0);
+    });
+    if (!list.length) return;
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = '处理中 0 / ' + list.length;
+    }
+
+    var maxOrder = state.works.reduce(function (max, item) {
+      if (!item || item.pending) return max;
+      return Math.max(max, Number.isFinite(item.order) ? item.order : -1);
+    }, -1);
+
+    var index = 0;
+    var chain = Promise.resolve();
+
+    list.forEach(function (work) {
+      chain = chain.then(function () {
+        return Store.updateWork(work.id, { pending: 0, order: maxOrder + 1 + index }).then(
+          function () {
+            work.pending = 0;
+            work.order = maxOrder + 1 + index;
+            index += 1;
+            if (button) button.textContent = '处理中 ' + index + ' / ' + list.length;
+          },
+          function (error) {
+            showToast(
+              '「' + (work.title || '未命名') + '」完成失败：' + (error && error.message ? error.message : '未知错误'),
+              true
+            );
+          }
+        );
+      });
+    });
+
+    markSelfWrite();
+    chain.then(function () {
+      // 重新排一次：把转正的作品挪到末尾
+      var done = state.works.filter(function (w) {
+        return !w.pending;
+      });
+      var stillPending = state.works.filter(function (w) {
+        return w.pending;
+      });
+      done.sort(function (a, b) {
+        return (Number(a.order) || 0) - (Number(b.order) || 0);
+      });
+      state.works = done.concat(stillPending);
+      renderWorks();
+      showToast('已把 ' + index + ' 件作品排到末尾');
+    });
+  }
+
   function finishPendingWork(card, id, button) {
     var work = state.works.find(function (item) {
       return item.id === id;
@@ -1801,12 +1883,21 @@
     var doneWorks = [];
     state.works.forEach(function (work) {
       if (work && work.pending) pendingWorks.push(work);
+      /* 待完善区按上传先后显示，不用 order（服务端会重排它）。 */
       else doneWorks.push(work);
     });
 
     // 首次渲染让全部卡片依次入场；之后只有新上传的作品入场。
     var entering = 0;
     var fragment = document.createDocumentFragment();
+
+      /* 按上传先后显示待完善作品。 */
+      pendingWorks.sort(function (a, b) {
+        var sa = Number(a.pendingSeq) || 0;
+        var sb = Number(b.pendingSeq) || 0;
+        if (sa !== sb) return sa - sb;
+        return (Number(a.order) || 0) - (Number(b.order) || 0);
+      });
 
     if (pendingWorks.length) {
       fragment.appendChild(createPendingSection(pendingWorks));
@@ -2409,6 +2500,9 @@
     }
 
     var errors = [];
+    /* 本次上传的递增序号：用来给待完善作品排一个稳定的先后。
+       并发压缩时谁先完成不固定，但「你在选择框里选的第几张」是确定的。 */
+    var pendingSeq = 0;
     var created = 0;
     var freshIds = [];
     var nextOrder =
@@ -2448,8 +2542,12 @@
           displayType: derivatives.displayType,
           thumbType: derivatives.thumbType,
           pending: 1,
-          order: -1000 + index,
-          createdAt: Date.now()
+          /* 用全局递增序号保证「先选的照片排在前面」：
+             并发时 index 到达顺序不固定，所以用 pendingSeq 自增。 */
+          pendingSeq: pendingSeq++,
+          /* order 仍给一个正常值：服务端 sortStoreWorks 会把 order 重排成 0..n-1，
+             负数会被抹平。待完善作品的先后改用 pendingSeq 记录，不依赖 order。 */
+          order: nextOrder + index,
         };
         await Store.addWork(record);
         created += 1;
