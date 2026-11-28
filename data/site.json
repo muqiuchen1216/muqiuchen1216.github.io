@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 391,
-  "updatedAt": "2026-11-28T10:34:33.623Z",
+  "revision": 392,
+  "updatedAt": "2026-11-28T10:35:22.953Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -457,25 +457,6 @@
       "thumbUrl": "/media/w-c2f8d420-ad1c-4f6a-9776-afa066e040ee-thumb-mx09v5mz.webp",
       "updatedAt": 1795862071483,
       "createdAt": 1795862001851
-    },
-    {
-      "id": "w-ece2b81f-bb17-4ee1-85e5-88430091f26f",
-      "title": "BOOM",
-      "en": "",
-      "year": "2026",
-      "location": "广州，中国",
-      "category": "studio",
-      "composition": "landscape",
-      "caption": "",
-      "width": 4800,
-      "height": 2700,
-      "pending": 0,
-      "pendingSeq": 0,
-      "order": 25,
-      "displayUrl": "/media/w-ece2b81f-bb17-4ee1-85e5-88430091f26f-display-mx09vl4gr1.webp",
-      "thumbUrl": "/media/w-ece2b81f-bb17-4ee1-85e5-88430091f26f-thumb-mx09vjr9.webp",
-      "updatedAt": 1795862073623,
-      "createdAt": 1795862019843
     }
   ]
 }
