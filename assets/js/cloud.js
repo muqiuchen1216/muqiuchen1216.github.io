@@ -715,6 +715,44 @@
       });
   }
 
+  /* 只「查」不「删」：列出哪些图片没有被任何作品引用。
+     配合确认步骤使用 —— 用户看清楚要删什么，再决定。 */
+  function scanOrphanMedia() {
+    if (!canWrite()) return Promise.resolve({ files: [], total: 0 });
+
+    return readSite().then(function (current) {
+      if (!current || !current.site) return { files: [], total: 0 };
+      var site = current.site;
+
+      var keep = {};
+      var keepUrl = function (url) {
+        var name = String(url || '').split('/').pop();
+        if (name) keep[name] = true;
+      };
+      (site.works || []).forEach(function (work) {
+        keepUrl(work.displayUrl);
+        keepUrl(work.thumbUrl);
+      });
+      if (site.profile) keepUrl(site.profile.avatar);
+
+      return request(repoBase() + '/contents/' + encodePath(MEDIA_DIR) + '?ref=' + encodeURIComponent(config.branch), {
+        timeout: 15000
+      }).then(function (list) {
+        if (!Array.isArray(list)) return { files: [], total: 0 };
+        var orphans = list
+          .filter(function (item) {
+            return item && item.name && !keep[item.name];
+          })
+          .map(function (item) {
+            return { name: item.name, bytes: Number(item.size) || 0 };
+          });
+        return { files: orphans, total: list.length };
+      });
+    }).catch(function () {
+      return { files: [], total: 0 };
+    });
+  }
+
   function purgeOrphanMedia() {
     if (!canWrite()) return Promise.resolve({ removed: 0, total: 0 });
 
@@ -812,6 +850,7 @@
     deleteMedia: deleteMedia,
     purgeMediaForWork: purgeMediaForWork,
     purgeMediaForWorks: purgeMediaForWorks,
+    scanOrphanMedia: scanOrphanMedia,
     purgeOrphanMedia: purgeOrphanMedia,
     probe: probe,
     utf8ToBytes: utf8ToBytes,

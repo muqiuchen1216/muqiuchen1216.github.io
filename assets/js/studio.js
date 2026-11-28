@@ -3156,20 +3156,60 @@ else if (index >= 4) image.setAttribute('fetchpriority', 'low');
 
     if (clean) {
       clean.addEventListener('click', function () {
+        /* 两步走：先扫描并列出清单，用户确认后才真的删。
+           以前是点了直接删、不可恢复，风险太高。 */
         clean.disabled = true;
-        if (note) note.textContent = '正在检查 media/ 目录…';
-        Cloud.purgeOrphanMedia().then(
-          function (result) {
+        if (note) note.textContent = '正在扫描 media/ 目录…';
+
+        Cloud.scanOrphanMedia().then(
+          function (scan) {
             clean.disabled = false;
-            if (note) {
-              note.textContent = result.removed
-                ? '清理完成：删掉 ' + result.removed + ' 张没被用到的图片。'
-                : '很干净：没有多余的图片（共 ' + result.total + ' 个文件）。';
+            var files = (scan && scan.files) || [];
+            if (!files.length) {
+              if (note) note.textContent = '很干净：没有任何多余的图片（共 ' + (scan.total || 0) + ' 个文件）。';
+              return;
             }
+
+            var totalKB = Math.round(
+              files.reduce(function (sum, f) {
+                return sum + (Number(f.bytes) || 0);
+              }, 0) / 1024
+            );
+            var preview = files.slice(0, 8).map(function (f) {
+              return '· ' + f.name;
+            }).join('\n');
+            if (files.length > 8) preview += '\n… 还有 ' + (files.length - 8) + ' 个';
+
+            var ok = window.confirm(
+              '找到 ' + files.length + ' 张没有被任何作品引用的图片（约 ' + totalKB + ' KB）：\n\n' +
+                preview +
+                '\n\n删除后无法通过界面恢复（GitHub 历史里还能找回，但需要技术操作）。确定删除吗？'
+            );
+            if (!ok) {
+              if (note) note.textContent = '已取消，什么都没删。';
+              return;
+            }
+
+            clean.disabled = true;
+            if (note) note.textContent = '正在删除 ' + files.length + ' 张…';
+            Cloud.purgeOrphanMedia().then(
+              function (result) {
+                clean.disabled = false;
+                if (note) {
+                  note.textContent = result.removed
+                    ? '清理完成：删掉 ' + result.removed + ' 张没被用到的图片，共 ' + (result.total || 0) + ' 个文件。'
+                    : '没有删掉任何文件，可能已经被清理过了。';
+                }
+              },
+              function (error) {
+                clean.disabled = false;
+                if (note) note.textContent = '清理失败：' + (error && error.message ? error.message : '未知原因');
+              }
+            );
           },
           function (error) {
             clean.disabled = false;
-            if (note) note.textContent = '清理失败：' + (error && error.message ? error.message : '未知原因');
+            if (note) note.textContent = '扫描失败：' + (error && error.message ? error.message : '未知原因');
           }
         );
       });

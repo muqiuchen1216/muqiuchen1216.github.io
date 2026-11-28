@@ -914,8 +914,18 @@
     /* 首屏只抢前 2 张，其余全部懒加载。
        国内到 GitHub Pages 的图片带宽实测约 70 KB/s，一张缩略图要 3~6 秒，
        同时发 16 个请求会把带宽切碎、谁都出不来；少而有序反而更快看到图。 */
-    image.loading = index < 2 ? 'eager' : 'lazy';
-    if (index === 0) image.setAttribute('fetchpriority', 'high');
+    /* 首屏只 eager 第一张，其余全部 lazy。
+       实测：只 eager 2 张时仍会发出 22 个图片请求 —— 浏览器的
+       lazy 预加载很激进，会把首屏那几张的带宽抢走。
+       改成只 eager 第 1 张，并给后面的设低优先级，
+       首屏那两张能更快出来（图片本身一个字节都没改）。 */
+    /* 首屏第一张直接加载，其余等滚动靠近时才赋 src。
+       只设 loading="lazy" 时浏览器仍会预扫全列表、同时开 26 个请求，
+       带宽被摊薄，首屏那两张反而要等。图片本身没有任何压缩。 */
+    image.dataset.lazySrc = work.thumbUrl;
+    image.loading = 'lazy';
+    image.setAttribute('fetchpriority', index === 0 ? 'high' : 'low');
+    lazyWatch(image);
     image.decoding = 'async';
 
     var arrow = document.createElement('span');
@@ -993,10 +1003,16 @@
     meta.appendChild(ratio);
     card.appendChild(meta);
 
-    image.src = work.thumbUrl;
-    if (image.complete) {
-      if (image.naturalWidth) reveal();
-      else breakCard();
+    /* 第一张立即给 src；其余由 lazyWatch 在滚到附近时赋值。
+       ⚠️ 只有「已经有 src」时才检查 complete ——
+       还没赋 src 的 img，complete 是 true 且 naturalWidth 是 0，
+       会被误判成「图片坏了」而把元素删掉（之前只剩 1 张图就是这个原因）。 */
+    if (index === 0) {
+      image.src = work.thumbUrl;
+      if (image.complete) {
+        if (image.naturalWidth) reveal();
+        else breakCard();
+      }
     }
 
     return card;
@@ -1842,6 +1858,41 @@
     /* 页脚始终显示 —— 这是「没令牌时唯一的进门路」 */
     var footerStudio = document.querySelector('.site-footer__admin');
     if (footerStudio) footerStudio.hidden = false;
+  }
+
+  /* 图片按需加载：只有当它接近视口时才真正赋 src。
+     为什么不用原生的 loading="lazy"：浏览器会对整个列表做预扫，
+     26 张图几乎同时发起请求，带宽被摊薄，首屏那两张反而要等。
+     这里手动控制，一次只放行「快滚到了」的那几张。 */
+  var lazyObserver = null;
+
+  function lazyWatch(image) {
+    if (!image) return;
+    var src = image.dataset.lazySrc;
+    if (!src) return;
+
+    /* 不支持 IntersectionObserver 的老浏览器：直接加载，别把图弄丢 */
+    if (!('IntersectionObserver' in window)) {
+      image.src = src;
+      return;
+    }
+
+    if (!lazyObserver) {
+      lazyObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var img = entry.target;
+            var pending = img.dataset.lazySrc;
+            if (pending && !img.src) img.src = pending;
+            lazyObserver.unobserve(img);
+          });
+        },
+        /* 提前 300px 开始加载：滚到时刚好已经好了，不会看到空框 */
+        { rootMargin: '300px 0px' }
+      );
+    }
+    lazyObserver.observe(image);
   }
 
   function setupReveal() {
