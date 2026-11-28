@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 393,
-  "updatedAt": "2026-11-28T10:37:41.177Z",
+  "revision": 394,
+  "updatedAt": "2026-11-28T11:51:44.874Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -457,6 +457,25 @@
       "thumbUrl": "/media/w-c2f8d420-ad1c-4f6a-9776-afa066e040ee-thumb-mx09v5mz.webp",
       "updatedAt": 1795862071483,
       "createdAt": 1795862001851
+    },
+    {
+      "id": "w-7175fce8-a8b7-4763-8592-5d22faa263d6",
+      "title": "画质修复 超清 微信图片 20250917081335 341 586",
+      "en": "",
+      "year": "2026",
+      "location": "广州，中国",
+      "category": "",
+      "composition": "",
+      "caption": "",
+      "width": 5120,
+      "height": 2880,
+      "pending": 1,
+      "pendingSeq": 0,
+      "order": 25,
+      "displayUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-display-mx0cnxwr.webp",
+      "thumbUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-thumb-mx0cnzthr1.webp",
+      "updatedAt": 1795866704874,
+      "createdAt": 1795866704874
     }
   ]
 }
