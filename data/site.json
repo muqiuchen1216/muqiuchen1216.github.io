@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 385,
-  "updatedAt": "2026-11-28T10:34:05.481Z",
+  "revision": 386,
+  "updatedAt": "2026-11-28T10:34:07.719Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -465,7 +465,7 @@
       "year": "2026",
       "location": "广州，中国",
       "category": "studio",
-      "composition": "",
+      "composition": "landscape",
       "caption": "",
       "width": 4800,
       "height": 2700,
@@ -474,7 +474,7 @@
       "order": 1,
       "displayUrl": "/media/w-ece2b81f-bb17-4ee1-85e5-88430091f26f-display-mx09vl4gr1.webp",
       "thumbUrl": "/media/w-ece2b81f-bb17-4ee1-85e5-88430091f26f-thumb-mx09vjr9.webp",
-      "updatedAt": 1795862045481,
+      "updatedAt": 1795862047719,
       "createdAt": 1795862019843
     }
   ]
