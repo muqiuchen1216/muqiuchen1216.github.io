@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 405,
-  "updatedAt": "2026-11-28T11:52:25.685Z",
+  "revision": 406,
+  "updatedAt": "2026-11-28T11:52:43.079Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -463,7 +463,7 @@
       "title": "明日香 电车",
       "en": "",
       "year": "2025",
-      "location": "广州，中国",
+      "location": "佛山，中国",
       "category": "cinematic",
       "composition": "landscape",
       "caption": "",
@@ -474,7 +474,7 @@
       "order": 0,
       "displayUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-display-mx0cnxwr.webp",
       "thumbUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-thumb-mx0cnzthr1.webp",
-      "updatedAt": 1795866745685,
+      "updatedAt": 1795866763079,
       "createdAt": 1795866704874
     }
   ]
