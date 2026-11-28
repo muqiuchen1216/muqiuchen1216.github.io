@@ -1358,7 +1358,14 @@
          用起来像「缩略图坏了」。工作室总共才几十件，
          直接 eager 全部拉下来（走本地服务器或已缓存），反而更顺。
          占位颜色由 CSS 的 .work-editor__thumb 背景负责，不会白闪。 */
-      image.loading = 'eager';
+/* 不再一次性下载全部缩略图。
+   以前 26 张全部 eager，1.6MB 同时抢带宽，每张都要等很久；
+   现在只有第一屏的几张立即加载，其余等快划到才加载 ——
+   看得见的那几张几乎秒出，后面的跟着滑动陆续就位。
+   图片本身一个字节都没重新压缩，画质完全不变。 */
+image.loading = index < 4 ? 'eager' : 'lazy';
+if (index === 0) image.setAttribute('fetchpriority', 'high');
+else if (index >= 4) image.setAttribute('fetchpriority', 'low');
       image.decoding = 'async';
       /* 关掉浏览器自带的图片拖拽，不然长按拖卡片会变成拖图片 */
       image.draggable = false;
