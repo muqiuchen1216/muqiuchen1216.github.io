@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 396,
-  "updatedAt": "2026-11-28T11:51:59.242Z",
+  "revision": 397,
+  "updatedAt": "2026-11-28T11:52:03.103Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -460,7 +460,7 @@
     },
     {
       "id": "w-7175fce8-a8b7-4763-8592-5d22faa263d6",
-      "title": "",
+      "title": "m'r",
       "en": "",
       "year": "2026",
       "location": "广州，中国",
@@ -474,7 +474,7 @@
       "order": 0,
       "displayUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-display-mx0cnxwr.webp",
       "thumbUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-thumb-mx0cnzthr1.webp",
-      "updatedAt": 1795866719242,
+      "updatedAt": 1795866723103,
       "createdAt": 1795866704874
     }
   ]
