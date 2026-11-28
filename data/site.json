@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 407,
-  "updatedAt": "2026-11-28T11:52:48.638Z",
+  "revision": 408,
+  "updatedAt": "2026-11-28T11:53:23.091Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -469,12 +469,12 @@
       "caption": "",
       "width": 5120,
       "height": 2880,
-      "pending": 1,
+      "pending": 0,
       "pendingSeq": 0,
-      "order": 0,
+      "order": 24,
       "displayUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-display-mx0cnxwr.webp",
       "thumbUrl": "/media/w-7175fce8-a8b7-4763-8592-5d22faa263d6-thumb-mx0cnzthr1.webp",
-      "updatedAt": 1795866768638,
+      "updatedAt": 1795866803091,
       "createdAt": 1795866704874
     }
   ]
