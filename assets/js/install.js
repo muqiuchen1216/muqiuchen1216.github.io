@@ -63,9 +63,29 @@
     return installButton;
   }
 
+  /* 是不是「已经从主屏图标打开」（也就是已经装好了）。
+     standalone 是安卓 Chrome / Edge 的独立窗口模式；
+     navigator.standalone 是 iOS Safari 的老写法。 */
+  function isInstalled() {
+    try {
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+      if (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) return true;
+      if (window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches) return true;
+    } catch (error) {
+      /* 老浏览器没有 matchMedia 就算了 */
+    }
+    if (navigator.standalone === true) return true;
+    return false;
+  }
+
   function showButton() {
     /* 「装到主屏」是站长自己的工具，访客不该看到。
-       只有这台设备连过令牌（也就是站长本人）才显示。 */
+       只有这台设备连过令牌（也就是站长本人）才显示。
+       而且 —— 已经装过了就别再提示，否则用户每次打开都看到同一个按钮。 */
+    if (isInstalled()) {
+      hideButton();
+      return;
+    }
     var writable = Boolean(
       window.PortfolioCloud && typeof window.PortfolioCloud.canWrite === 'function' && window.PortfolioCloud.canWrite()
     );

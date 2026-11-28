@@ -1101,8 +1101,8 @@
        竖图却高达 270px，两列累高差被放大，中间留出大片空白，
        标签也挤在一起看不清。单列图大、标签清楚、瀑布流也不会空。 */
     var columns = width < 300 ? 1 : 2;
-    var columnGap = width >= 1100 ? 28 : width >= 640 ? 16 : 8;
-    var verticalGap = width >= 640 ? 38 : 18;
+    var columnGap = width >= 1100 ? 28 : width >= 640 ? 16 : 6;
+    var verticalGap = width >= 640 ? 38 : 14;
     /* 标签叠在图片底部，不再占额外高度。 */
     var captionHeight = 0;
     var columnWidth = (width - columnGap * (columns - 1)) / columns;

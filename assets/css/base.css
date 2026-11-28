@@ -368,7 +368,7 @@ ol {
 @media (max-width: 720px) {
   :root {
     --header-h: 64px;
-    --page-pad: 20px;
+    --page-pad: 12px;
   }
 
   body {
