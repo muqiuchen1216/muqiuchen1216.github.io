@@ -12,7 +12,7 @@
 
 /* 改动缓存策略时把这个版本号 +1：activate 会把旧版本缓存全部删掉，
    避免用户手里留着上一版的行为。 */
-var VERSION = 'muq-v22';
+var VERSION = 'muq-v23';
 var SHELL_CACHE = VERSION + '-shell';
 var MEDIA_CACHE = VERSION + '-media';
 
@@ -161,6 +161,14 @@ self.addEventListener('fetch', function (event) {
 
   if (isMedia(url)) {
     event.respondWith(cacheFirst(request, MEDIA_CACHE));
+    return;
+  }
+
+  /* HTML 页面：永远只走网络，绝不缓存。
+     GitHub Pages 已经给 HTML 加了 10 分钟缓存，SW 再缓存一层的话，
+     用户删了作品要等十几分钟才看得到 —— 这就是「网站没实时更新」。 */
+  if (url.pathname.endsWith('/') || /\.html$/i.test(url.pathname)) {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 

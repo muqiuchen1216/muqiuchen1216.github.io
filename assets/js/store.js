@@ -264,6 +264,36 @@ var THUMB_EDGE = 720;
     window.addEventListener('focus', poll);
   }
 
+    /* 访客页面（静态模式）也要能自动看到更新：
+       以前只有带令牌的云端模式才有轮询，访客打开后一直停在旧数据，
+       站长删了作品、访客那边还是老样子。
+       这里给静态模式也加一个轻量轮询 —— 只读 data/site.json（带时间戳），
+       不加令牌、不消耗接口额度，走的是 GitHub Pages 的普通请求。 */
+    var STATIC_POLL_MS = 45000;
+    var staticPollTimer = 0;
+
+    function ensureStaticRefresh() {
+      if (mode !== 'static') return;
+      if (staticPollTimer) return;
+
+      var poll = function () {
+        if (document.visibilityState === 'hidden') return;
+        fetchPublished().then(function (ok) {
+          if (!ok) return;
+          setLiveState('connected');
+          /* adoptPublished 内部已经更新了 publishedWorks / publishedProfile，
+             这里只需要通知界面重绘 */
+          emit({ type: 'site', revision: lastRevision });
+        });
+      };
+
+      staticPollTimer = window.setInterval(poll, STATIC_POLL_MS);
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') poll();
+      });
+      window.addEventListener('focus', poll);
+    }
+
   /* ---------- 服务器接口 ---------- */
 
   function apiRequest(path, options, timeout) {
@@ -2012,7 +2042,7 @@ var THUMB_EDGE = 720;
     mode = result;
     readyResolve({ mode: mode });
     if (mode === 'server' || mode === 'cloud') ensureLiveChannel();
-    else if (mode === 'static') setLiveState('static');
+    else if (mode === 'static') { setLiveState('static'); ensureStaticRefresh(); }
     else setLiveState('local');
   });
 
