@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "revision": 378,
-  "updatedAt": "2026-11-28T10:32:38.974Z",
+  "revision": 379,
+  "updatedAt": "2026-11-28T10:33:21.851Z",
   "profile": {
     "siteName": "沐秋晨作品集",
     "name": "沐秋晨",
@@ -438,6 +438,25 @@
       "updatedAt": 1793677413602,
       "pending": 0,
       "pendingSeq": 0
+    },
+    {
+      "id": "w-c2f8d420-ad1c-4f6a-9776-afa066e040ee",
+      "title": "DSC00741",
+      "en": "",
+      "year": "2026",
+      "location": "广州，中国",
+      "category": "",
+      "composition": "",
+      "caption": "",
+      "width": 4800,
+      "height": 2700,
+      "pending": 1,
+      "pendingSeq": 0,
+      "order": 26,
+      "displayUrl": "/media/w-c2f8d420-ad1c-4f6a-9776-afa066e040ee-display-mx09v7a4r1.webp",
+      "thumbUrl": "/media/w-c2f8d420-ad1c-4f6a-9776-afa066e040ee-thumb-mx09v5mz.webp",
+      "updatedAt": 1795862001851,
+      "createdAt": 1795862001851
     }
   ]
 }
