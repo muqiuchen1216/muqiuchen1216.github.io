@@ -140,6 +140,24 @@
     return '/' + value.replace(/^\.\//, '');
   }
 
+  /* 把 /media/xxx.webp 换成 GitHub raw 直链。
+     用途：刚上传的图，GitHub Pages 还没重建完（要 30~60 秒），本站地址是 404；
+     但 raw.githubusercontent.com 上传完立刻就有 —— 改走 raw，
+     用户不用等站点重建就能看到缩略图。 */
+  function rawMediaUrl(url) {
+    if (typeof isCloudMode === 'function' && !isCloudMode()) return '';
+    if (!window.Cloud || typeof Cloud.getConfig !== 'function') return '';
+    var name = String(url || '').split('?')[0].split('/').pop();
+    if (!name) return '';
+    var cfg = Cloud.getConfig() || {};
+    if (!cfg.owner || !cfg.repo) return '';
+    return (
+      'https://raw.githubusercontent.com/' +
+      cfg.owner + '/' + cfg.repo + '/' + (cfg.branch || 'main') +
+      '/media/' + encodeURIComponent(name) + '?t=' + Date.now()
+    );
+  }
+
   function isServerMode() {
     return Boolean(Store && typeof Store.getMode === 'function' && Store.getMode() === 'server');
   }
@@ -1353,19 +1371,13 @@
     if (thumbUrl) {
       var image = document.createElement('img');
       image.alt = work.title ? work.title : '作品缩略图';
-      /* 工作室里不要懒加载。
-         列表卡片很高，一屏只看得到 2~3 张，懒加载会让快速滑动时看到一片灰框，
-         用起来像「缩略图坏了」。工作室总共才几十件，
-         直接 eager 全部拉下来（走本地服务器或已缓存），反而更顺。
-         占位颜色由 CSS 的 .work-editor__thumb 背景负责，不会白闪。 */
-/* 不再一次性下载全部缩略图。
-   以前 26 张全部 eager，1.6MB 同时抢带宽，每张都要等很久；
-   现在只有第一屏的几张立即加载，其余等快划到才加载 ——
-   看得见的那几张几乎秒出，后面的跟着滑动陆续就位。
-   图片本身一个字节都没重新压缩，画质完全不变。 */
-image.loading = index < 4 ? 'eager' : 'lazy';
-if (index === 0) image.setAttribute('fetchpriority', 'high');
-else if (index >= 4) image.setAttribute('fetchpriority', 'low');
+      /* 缩略图：全部立刻加载，不做懒加载。
+         工作室的卡片很高，一屏只看得到 2~3 张；用懒加载的话，
+         快速滑动时会先看到一片空框，用起来就像「缩略图坏了」——
+         这正是反复被反馈的问题，所以这里一律 eager。
+         图片本身没有任何压缩，画质不变。 */
+      image.loading = 'eager';
+      image.setAttribute('fetchpriority', index < 4 ? 'high' : 'auto');
       image.decoding = 'async';
       /* 关掉浏览器自带的图片拖拽，不然长按拖卡片会变成拖图片 */
       image.draggable = false;
@@ -1374,16 +1386,27 @@ else if (index >= 4) image.setAttribute('fetchpriority', 'low');
       });
       image.src = thumbUrl;
       image.addEventListener('error', function () {
-        /* 一次失败再试一次：服务器刚重启、或临时网络抖动时很常见 */
+        /* 刚上传的图片，GitHub Pages 需要 30~60 秒重建站点，
+           这段时间 /media/xxx.webp 是 404 —— 这就是「缩略图看不到」的原因。
+           对策分三级：先重试本站地址，再改走 raw.githubusercontent.com
+           （那边上传完立刻可读，不用等重建），最后才提示失败。 */
         if (!image.dataset.retried) {
           image.dataset.retried = '1';
           image.src = thumbUrl + '?r=' + Date.now();
           return;
         }
+        if (!image.dataset.rawTried) {
+          var raw = rawMediaUrl(thumbUrl);
+          if (raw) {
+            image.dataset.rawTried = '1';
+            image.src = raw;
+            return;
+          }
+        }
         if (image.parentNode) image.parentNode.removeChild(image);
         var fallback = document.createElement('p');
         fallback.className = 'work-editor__thumb-fallback';
-        fallback.textContent = '缩略图无法显示';
+        fallback.textContent = isCloudMode() ? '图片还在同步…' : '缩略图无法显示';
         thumb.appendChild(fallback);
       });
       thumb.appendChild(image);
