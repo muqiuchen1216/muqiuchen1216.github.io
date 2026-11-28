@@ -2932,3 +2932,108 @@ body.has-bulk-bar .works-list {
     animation: none;
   }
 }
+
+/* =========================================================
+   云端设置面板：修白底白字 + 把「清理图片」做成看得见的按钮
+   ---------------------------------------------------------
+   原来面板背景是浅米色 #f4f0e9，但文字沿用了深色主题的浅色，
+   等于白底白字 —— 不仔细看根本发现不了「清理没用的图片」这个功能。
+   现在改成深色卡片，并把清理动作做成醒目的金色主按钮。
+   ========================================================= */
+
+.cloud-panel__inner {
+  background: #14161b !important;
+  border: 1px solid rgba(200, 168, 107, 0.28) !important;
+  color: #ece7de !important;
+  padding: 20px 22px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.cloud-panel h2 {
+  color: #f4f1ea !important;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.cloud-panel__lead {
+  color: rgba(236, 231, 222, 0.82) !important;
+  opacity: 1 !important;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.cloud-panel__note {
+  color: rgba(236, 231, 222, 0.55) !important;
+  opacity: 1 !important;
+  font-size: 12px;
+}
+
+/* 按钮区：主要动作（清理图片）做成金色实心，一眼能找到 */
+.cloud-panel__actions {
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cloud-panel__actions .button {
+  min-height: 44px;
+  padding: 11px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 11px;
+}
+
+/* 「清理没用的图片」= 主按钮 */
+#cloudCleanOrphans {
+  background: linear-gradient(180deg, #d4b478, #b8944f) !important;
+  border: 1px solid #d4b478 !important;
+  color: #14161a !important;
+  box-shadow: 0 4px 16px rgba(200, 168, 107, 0.32);
+}
+
+#cloudCleanOrphans:hover {
+  filter: brightness(1.08);
+}
+
+#cloudCleanOrphans:disabled {
+  opacity: 0.6;
+  filter: none;
+}
+
+/* 「断开这台设备」= 次要，但也要看得清 */
+#cloudForget {
+  color: #e8a08a !important;
+  border: 1px solid rgba(232, 160, 138, 0.45) !important;
+  background: rgba(232, 160, 138, 0.08) !important;
+}
+
+#cloudForget:hover {
+  background: rgba(232, 160, 138, 0.16) !important;
+}
+
+/* 「关闭」= 最弱 */
+#cloudPanelClose {
+  color: rgba(236, 231, 222, 0.7) !important;
+  border: 1px solid rgba(236, 231, 222, 0.22) !important;
+  background: transparent !important;
+}
+
+#cloudPanelClose:hover {
+  color: #fff !important;
+  border-color: rgba(236, 231, 222, 0.45) !important;
+}
+
+@media (max-width: 560px) {
+  .cloud-panel__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cloud-panel__actions .button {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+    font-size: 14.5px;
+  }
+}

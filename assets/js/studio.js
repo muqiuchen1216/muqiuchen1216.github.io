@@ -3133,6 +3133,11 @@ else if (index >= 4) image.setAttribute('fetchpriority', 'low');
       parts.push('仓库：' + (cfg.owner || '') + '/' + (cfg.repo || '') + '（' + (cfg.branch || 'main') + '）');
       if (rate.limit) parts.push('本小时还剩 ' + rate.remaining + ' / ' + rate.limit + ' 次接口调用');
       info.textContent = parts.join('　·　');
+      if (note) {
+        note.textContent =
+          '「清理没用的图片」会扫描仓库的 media/ 目录，把没有任何作品引用的图片删掉。' +
+          '正常用的时候不会有太多残留，偶尔跑一次就行。';
+      }
     }
 
     if (toolbar) {
