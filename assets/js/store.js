@@ -330,12 +330,57 @@ var THUMB_EDGE = 720;
       );
   }
 
+  /* ---------- 本地数据缓存（让工作室「秒开」） ---------- */
+
+  /* 为什么需要它：
+     云端模式下开机要先请求 GitHub 接口拿作品列表，
+     手机网络慢时这一步要 2~5 秒 —— 这期间工作室是一片空白，
+     用户以为没反应，会反复点。
+
+     做法：每次成功取到数据就存一份到 localStorage；
+     下次打开先拿这份立刻渲染（0 延迟），再在后台请求最新数据覆盖。
+     代价是可能先看到几秒前的数据，但总比空白好，而且后台会自愈。 */
+  var SITE_CACHE_KEY = 'muq.site.cache.v1';
+  var SITE_CACHE_MAX_AGE = 1000 * 60 * 60 * 24; // 超过一天就别用了
+
+  function saveSiteCache(payload) {
+    try {
+      if (!payload || !Array.isArray(payload.works)) return;
+      window.localStorage.setItem(
+        SITE_CACHE_KEY,
+        JSON.stringify({
+          at: Date.now(),
+          revision: Number(payload.revision) || 0,
+          profile: payload.profile || {},
+          works: payload.works
+        })
+      );
+    } catch (error) {
+      /* 存储满了或隐私模式，存不下就算了，不影响功能 */
+    }
+  }
+
+  function loadSiteCache() {
+    try {
+      var raw = window.localStorage.getItem(SITE_CACHE_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.works)) return null;
+      if (Date.now() - Number(parsed.at || 0) > SITE_CACHE_MAX_AGE) return null;
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function adoptSite(payload) {
     if (!payload) return;
     siteSnapshot = payload;
     var revision = Number(payload.revision);
     if (Number.isFinite(revision) && revision > lastRevision) lastRevision = revision;
     if (typeof payload.canEdit === 'boolean') setAccess(payload.canEdit, payload.unlock);
+    /* 顺手存一份到本地：下次打开工作室直接用它渲染，不用等网络。 */
+    saveSiteCache(payload);
   }
 
   /* ---------- 编辑权限 ---------- */
@@ -436,20 +481,42 @@ var THUMB_EDGE = 720;
     }
     /* 先看这台设备有没有配好令牌：有就直接进 cloud 模式（可读写）。
        没有令牌就按以前的逻辑走：本机服务器 → 线上静态数据。 */
-    if (Cloud && Cloud.canWrite && Cloud.canWrite()) {
-      return Cloud.readSite().then(
-        function (result) {
-          // 读得到就先渲染出来；仓库里暂时没数据也进 cloud，
-          // 第一次保存时 mutateSite 会自己建出这份文件。
-          if (result && result.site) adoptSite(result.site);
-          return 'cloud';
-        },
-        function () {
-          // 令牌无效或网络不通时退回只读，至少网站能正常浏览。
-          return 'static';
+      if (Cloud && Cloud.canWrite && Cloud.canWrite()) {
+        /* 关键优化：有本地缓存就「立刻」进 cloud 模式，
+           用缓存数据先把界面画出来（0 延迟），网络请求放后台跑。
+           以前这里必须 await Cloud.readSite() 才继续，手机弱网下要等 2~5 秒，
+           这期间工作室一片空白 —— 用户以为没反应会反复点。 */
+        var cached = loadSiteCache();
+        if (cached) {
+          adoptSite(cached);
+          lastRevision = Math.max(lastRevision, Number(cached.revision) || 0);
+          Cloud.readSite().then(
+            function (result) {
+              if (!result || !result.site) return;
+              var nextRevision = Number(result.site.revision) || 0;
+              if (nextRevision > lastRevision) {
+                adoptSite(result.site);
+                emit({ type: 'site', revision: nextRevision });
+              }
+            },
+            function () {
+              /* 网络有问题，先用缓存撑着，轮询会继续重试 */
+            }
+          );
+          /* detectMode 必须返回 Promise —— 调用处直接 .then() */
+          return Promise.resolve('cloud');
         }
-      );
-    }
+
+        return Cloud.readSite().then(
+          function (result) {
+            if (result && result.site) adoptSite(result.site);
+            return 'cloud';
+          },
+          function () {
+            return 'static';
+          }
+        );
+      }
     return apiRequest('/site', { method: 'GET' }, 4000).then(
       function (payload) {
         adoptSite(payload);
@@ -464,6 +531,12 @@ var THUMB_EDGE = 720;
   }
 
   function fetchSite() {
+    /* 云端模式：已经有一份数据（本地缓存或刚读到的）就直接返回，
+       不要再等一次网络 —— 工作室打开时靠这一步才能立刻出画面。
+       保存/删除后会主动把 siteSnapshot 置空，所以不会读到旧数据。 */
+    if (isCloud() && siteSnapshot && Array.isArray(siteSnapshot.works)) {
+      return Promise.resolve(siteSnapshot);
+    }
     if (isCloud()) {
       return Cloud.readSite().then(function (result) {
         if (!result || !result.site) return { works: [], profile: {}, revision: 0 };
